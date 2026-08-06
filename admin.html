@@ -46,7 +46,7 @@
 
     <!-- ════════════════════════════════ DASHBOARD ══ -->
     <div id="sec-dashboard" class="section active">
-      <div class="section-title">📊 Dashboard <span class="section-fecha" id="dash-fecha"></span></div>
+      <div class="section-title">Dashboard <span class="section-fecha" id="dash-fecha"></span></div>
 
       <div class="stats-grid" id="dash-stats">
         <div class="stat-card"><div class="stat-num" id="st-total">—</div><div class="stat-label">Personal activo</div></div>
@@ -69,9 +69,9 @@
 
     <!-- ════════════════════════════════ PERSONAL ══ -->
     <div id="sec-personal" class="section">
-      <div class="section-title">👥 Personal</div>
+      <div class="section-title">Personal</div>
       <div class="section-topbar">
-        <input type="text" class="search-input" id="pers-search" placeholder="🔍 Buscar por nombre o DNI..." oninput="filtrarPersonal()">
+        <input type="text" class="search-input" id="pers-search" placeholder="Buscar por nombre o DNI..." oninput="filtrarPersonal()">
         <button class="btn-primary" onclick="abrirModalNuevo()">+ Nuevo empleado</button>
       </div>
       <div class="card" style="padding:0; overflow:hidden;">
@@ -87,7 +87,7 @@
 
     <!-- ════════════════════════════════ ASISTENCIAS ══ -->
     <div id="sec-asistencias" class="section">
-      <div class="section-title">📋 Asistencias</div>
+      <div class="section-title">Asistencias</div>
       <div class="filtros">
         <div class="field"><label>Desde</label><input type="date" id="asist-desde" onchange="cargarAsistencias()"></div>
         <div class="field"><label>Hasta</label><input type="date" id="asist-hasta" onchange="cargarAsistencias()"></div>
@@ -107,7 +107,7 @@
 
     <!-- ════════════════════════════════ VALIDAR HORAS ══ -->
     <div id="sec-validar" class="section">
-      <div class="section-title">✅ Validar Horas</div>
+      <div class="section-title">Validar Horas</div>
       <div class="filtros" style="margin-bottom:20px">
         <div class="field"><label>Fecha</label><input type="date" id="val-fecha" onchange="cargarValidacion()"></div>
       </div>
@@ -116,7 +116,7 @@
 
     <!-- ════════════════════════════════ MI ASISTENCIA ══ -->
     <div id="sec-mi-asistencia" class="section">
-      <div class="section-title">🕐 Mi Asistencia</div>
+      <div class="section-title">Mi Asistencia</div>
 
       <div class="card estado-card" id="mi-card-estado">
         <div class="muted">Cargando...</div>
@@ -136,11 +136,11 @@
 
 <!-- ── Bottom Nav ── -->
 <nav class="bottom-nav">
-  <button class="bnav-item active" id="nav-dashboard"      onclick="showSection('dashboard')">      <span class="bnav-icon">📊</span><span>Dashboard</span></button>
-  <button class="bnav-item"        id="nav-personal"       onclick="showSection('personal')">       <span class="bnav-icon">👥</span><span>Personal</span></button>
-  <button class="bnav-item"        id="nav-asistencias"    onclick="showSection('asistencias')">    <span class="bnav-icon">📋</span><span>Asistencia</span></button>
-  <button class="bnav-item"        id="nav-validar"        onclick="showSection('validar')">        <span class="bnav-icon">✅</span><span>Validar</span></button>
-  <button class="bnav-item"        id="nav-mi-asistencia"  onclick="showSection('mi-asistencia')">  <span class="bnav-icon">🕐</span><span>Mi Turno</span></button>
+  <button class="bnav-item active" id="nav-dashboard"      onclick="showSection('dashboard')">      <span class="bnav-icon"><i data-lucide="layout-dashboard"></i></span><span>Dashboard</span></button>
+  <button class="bnav-item"        id="nav-personal"       onclick="showSection('personal')">       <span class="bnav-icon"><i data-lucide="users"></i></span><span>Personal</span></button>
+  <button class="bnav-item"        id="nav-asistencias"    onclick="showSection('asistencias')">    <span class="bnav-icon"><i data-lucide="clipboard-list"></i></span><span>Asistencia</span></button>
+  <button class="bnav-item"        id="nav-validar"        onclick="showSection('validar')">        <span class="bnav-icon"><i data-lucide="check-square"></i></span><span>Validar</span></button>
+  <button class="bnav-item"        id="nav-mi-asistencia"  onclick="showSection('mi-asistencia')">  <span class="bnav-icon"><i data-lucide="clock"></i></span><span>Mi Turno</span></button>
 </nav>
 
 <!-- ══ MODAL: Verificación Facial (Mi Asistencia) ═════ -->
@@ -211,7 +211,7 @@
 
     <!-- Preview foto actual o captura -->
     <div class="foto-wrap" id="foto-preview-wrap">
-      <div class="foto-placeholder" id="foto-placeholder">👤</div>
+      <div class="foto-placeholder" id="foto-placeholder"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
       <img id="foto-preview-img" style="display:none; width:120px; height:120px; border-radius:50%; object-fit:cover; border:3px solid var(--accent);" alt="preview">
     </div>
 
@@ -222,15 +222,15 @@
         <canvas id="foto-canvas-preview" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%;"></canvas>
       </div>
       <div class="cam-action-btns">
-        <button onclick="capturarFoto()" class="btn-primary btn-sm">📷 Capturar</button>
+        <button onclick="capturarFoto()" class="btn-primary btn-sm">Capturar</button>
         <button onclick="cerrarCamFoto()" class="btn-ghost btn-sm">Cancelar cámara</button>
       </div>
     </div>
 
     <div class="cam-action-btns">
-      <button onclick="abrirCamFoto()" class="btn-ghost btn-sm" id="btn-abrir-cam-foto">📷 Abrir cámara</button>
+      <button onclick="abrirCamFoto()" class="btn-ghost btn-sm" id="btn-abrir-cam-foto">Abrir cámara</button>
       <label class="btn-ghost btn-sm" style="cursor:pointer; display:inline-flex; align-items:center;">
-        📁 Subir archivo
+        Subir archivo
         <input type="file" id="foto-archivo" accept="image/*" style="display:none" onchange="desdeArchivo(event)">
       </label>
     </div>
@@ -247,9 +247,23 @@
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script src="shared.js"></script>
 <script src="face.js"></script>
 <script>
+// ════════════════════════════════════════════════════════
+// ÍCONOS SVG INLINE
+// ════════════════════════════════════════════════════════
+const IC = {
+  edit:   `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+  cam:    `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`,
+  trash:  `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`,
+  on:     `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5a9e6f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="5" width="22" height="14" rx="7"/><circle cx="16" cy="12" r="3" fill="#5a9e6f" stroke="#5a9e6f"/></svg>`,
+  off:    `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c05050" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="5" width="22" height="14" rx="7"/><circle cx="8" cy="12" r="3" fill="#c05050" stroke="#c05050"/></svg>`,
+  facial: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`,
+  manual: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>`,
+}
+
 // ════════════════════════════════════════════════════════
 // ESTADO GLOBAL
 // ════════════════════════════════════════════════════════
@@ -273,6 +287,7 @@ async function init() {
 
   await cargarPersonal()   // carga base antes de mostrar dashboard
   showSection('dashboard')
+  lucide.createIcons()
 }
 
 // ════════════════════════════════════════════════════════
@@ -295,6 +310,7 @@ function showSection(id) {
   if (id === 'asistencias')    { poblarFiltrosAsist(); cargarAsistencias() }
   if (id === 'validar')        cargarValidacion()
   if (id === 'mi-asistencia')  cargarMiAsistencia()
+  lucide.createIcons()
 }
 
 // ════════════════════════════════════════════════════════
@@ -328,7 +344,7 @@ function renderTablaPersonal(lista) {
       <td>
         ${p.foto_url
           ? `<img src="${p.foto_url}" class="mini-foto" alt="">`
-          : `<div class="mini-foto-placeholder">👤</div>`}
+          : `<div class="mini-foto-placeholder"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>`}
       </td>
       <td><strong>${p.apellido}</strong>, ${p.nombre}</td>
       <td class="muted">${p.dni || '—'}</td>
@@ -338,14 +354,15 @@ function renderTablaPersonal(lista) {
       <td><span class="tag ${p.activo ? 'tag-ok' : 'tag-err'}">${p.activo ? 'Activo' : 'Inactivo'}</span></td>
       <td>
         <div class="actions">
-          <button onclick="abrirModalEditar('${p.id}')" class="btn-ghost btn-sm" title="Editar">✏️</button>
-          <button onclick="abrirModalFoto('${p.id}')"   class="btn-ghost btn-sm" title="Foto facial">${p.foto_descriptor ? '📷' : '📷'}</button>
-          <button onclick="toggleActivo('${p.id}', ${p.activo})" class="btn-ghost btn-sm" title="${p.activo ? 'Desactivar' : 'Activar'}">${p.activo ? '🔴' : '🟢'}</button>
-          <button onclick="eliminarEmpleado('${p.id}', '${p.nombre} ${p.apellido}')" class="btn-danger btn-sm" title="Eliminar">🗑</button>
+          <button onclick="abrirModalEditar('${p.id}')" class="btn-ghost btn-sm" title="Editar">${IC.edit}</button>
+          <button onclick="abrirModalFoto('${p.id}')"   class="btn-ghost btn-sm" title="Foto facial">${IC.cam}</button>
+          <button onclick="toggleActivo('${p.id}', ${p.activo})" class="btn-ghost btn-sm" title="${p.activo ? 'Desactivar' : 'Activar'}">${p.activo ? IC.off : IC.on}</button>
+          <button onclick="eliminarEmpleado('${p.id}', '${p.nombre} ${p.apellido}')" class="btn-danger btn-sm" title="Eliminar">${IC.trash}</button>
         </div>
       </td>
     </tr>
   `).join('')
+  lucide.createIcons()
 }
 
 // ── Nuevo empleado ─────────────────────────────────────
@@ -608,8 +625,8 @@ async function cargarDashboard() {
       <td><strong>${perfil?.apellido}</strong>, ${perfil?.nombre}</td>
       <td>${perfil?.area || '<span class="muted">—</span>'}</td>
       <td>${perfil?.turno ? `<span class="tag tag-muted">${perfil.turno}</span>` : '<span class="muted">—</span>'}</td>
-      <td>${entrada ? `${fmtHora(entrada.hora)} <span class="tag-metodo">${entrada.verificado_facial ? '📷' : '✋'}</span>` : '<span class="muted">—</span>'}</td>
-      <td>${salida ? `${fmtHora(salida.hora)} <span class="tag-metodo">${salida.verificado_facial ? '📷' : '✋'}</span>` : (entrada ? '<span class="tag tag-warn">En jornada</span>' : '<span class="muted">—</span>')}</td>
+      <td>${entrada ? `${fmtHora(entrada.hora)} <span class="tag-metodo">${entrada.verificado_facial ? IC.facial : IC.manual}</span>` : '<span class="muted">—</span>'}</td>
+      <td>${salida ? `${fmtHora(salida.hora)} <span class="tag-metodo">${salida.verificado_facial ? IC.facial : IC.manual}</span>` : (entrada ? '<span class="tag tag-warn">En jornada</span>' : '<span class="muted">—</span>')}</td>
       <td>${hrs !== null ? `<strong>${hrs.toFixed(2)} h</strong>` : '<span class="muted">—</span>'}</td>
     </tr>`
   }).join('')
@@ -673,15 +690,15 @@ async function cargarAsistencias() {
       return `<tr>
         <td>
           <div class="emp-name-cell">
-            ${perfil?.foto_url ? `<img src="${perfil.foto_url}" class="mini-foto" alt="">` : `<div class="mini-foto-placeholder">👤</div>`}
+            ${perfil?.foto_url ? `<img src="${perfil.foto_url}" class="mini-foto" alt="">` : `<div class="mini-foto-placeholder"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>`}
             <div>
               <div><strong>${perfil?.apellido}</strong>, ${perfil?.nombre}</div>
               <div class="muted" style="font-size:12px">${perfil?.area || ''}${perfil?.turno ? ' · ' + perfil.turno : ''}</div>
             </div>
           </div>
         </td>
-        <td>${entrada ? `${fmtHora(entrada.hora)} <span class="tag-metodo" title="${entrada.verificado_facial ? 'Facial' : 'Manual'}">${entrada.verificado_facial ? '📷' : '✋'}</span>` : '<span class="muted">—</span>'}</td>
-        <td>${salida ? `${fmtHora(salida.hora)} <span class="tag-metodo" title="${salida.verificado_facial ? 'Facial' : 'Manual'}">${salida.verificado_facial ? '📷' : '✋'}</span>` : (entrada ? '<span class="tag tag-warn">Sin salida</span>' : '<span class="muted">—</span>')}</td>
+        <td>${entrada ? `${fmtHora(entrada.hora)} <span class="tag-metodo" title="${entrada.verificado_facial ? 'Facial' : 'Manual'}">${entrada.verificado_facial ? IC.facial : IC.manual}</span>` : '<span class="muted">—</span>'}</td>
+        <td>${salida ? `${fmtHora(salida.hora)} <span class="tag-metodo" title="${salida.verificado_facial ? 'Facial' : 'Manual'}">${salida.verificado_facial ? IC.facial : IC.manual}</span>` : (entrada ? '<span class="tag tag-warn">Sin salida</span>' : '<span class="muted">—</span>')}</td>
         <td>${hrs !== null ? `<strong>${hrs.toFixed(2)} h</strong>` : '<span class="muted">—</span>'}</td>
       </tr>`
     }).join('')
@@ -749,8 +766,8 @@ async function cargarValidacion() {
           <div class="val-nombre">${perfil?.apellido}, ${perfil?.nombre}</div>
           <div class="val-meta">${perfil?.area || ''}${perfil?.turno ? ' · ' + perfil.turno : ''}</div>
         </td>
-        <td>${entrada ? `${fmtHora(entrada.hora)} ${entrada.verificado_facial ? '📷' : '✋'}` : '<span class="muted">—</span>'}</td>
-        <td>${salida  ? `${fmtHora(salida.hora)} ${salida.verificado_facial ? '📷' : '✋'}`  : '<span class="tag tag-err">Sin salida</span>'}</td>
+        <td>${entrada ? `${fmtHora(entrada.hora)} ${entrada.verificado_facial ? IC.facial : IC.manual}` : '<span class="muted">—</span>'}</td>
+        <td>${salida  ? `${fmtHora(salida.hora)} ${salida.verificado_facial ? IC.facial : IC.manual}`  : '<span class="tag tag-err">Sin salida</span>'}</td>
         <td>${hrs !== null ? `<strong>${hrs.toFixed(2)} h</strong>` : '<span class="muted">—</span>'}</td>
         <td>
           <input type="number" class="horas-input" id="extra-${pid}"
@@ -841,27 +858,27 @@ function renderMiEstado() {
   const btn     = document.getElementById('mi-btn-marcar')
 
   if (!entrada) {
-    card.innerHTML = `<div class="estado-icon">⏰</div><div class="estado-txt">Sin registro hoy</div><div class="estado-fecha">${fmtFecha(hoy())}</div>`
+    card.innerHTML = `<div class="estado-icon"></div><div class="estado-txt">Sin registro hoy</div><div class="estado-fecha">${fmtFecha(hoy())}</div>`
     miTipoActual      = 'entrada'
-    btn.textContent   = '▶  Marcar Entrada'
+    btn.textContent   = 'Marcar Entrada'
     btn.className     = 'btn-marcar btn-entrada'
     btnWrap.style.display = 'block'
   } else if (!salida) {
     const hrs = diffHoras(entrada.hora, new Date().toISOString())
     card.innerHTML = `
-      <div class="estado-icon">✅</div>
+      <div class="estado-icon"></div>
       <div class="estado-txt">Entrada registrada</div>
-      <div class="estado-meta"><span>🕐 ${fmtHora(entrada.hora)}</span><span class="badge-facial">${entrada.verificado_facial ? '📷 Facial' : '✋ Manual'}</span></div>
+      <div class="estado-meta"><span>${fmtHora(entrada.hora)}</span><span class="badge-facial">${entrada.verificado_facial ? 'Facial' : 'Manual'}</span></div>
       ${hrs !== null ? `<div class="estado-trabajando">En jornada: ${hrs.toFixed(1)} h</div>` : ''}
     `
     miTipoActual      = 'salida'
-    btn.textContent   = '⏹  Marcar Salida'
+    btn.textContent   = 'Marcar Salida'
     btn.className     = 'btn-marcar btn-salida'
     btnWrap.style.display = 'block'
   } else {
     const hrs = diffHoras(entrada.hora, salida.hora)
     card.innerHTML = `
-      <div class="estado-icon">🏁</div>
+      <div class="estado-icon"></div>
       <div class="estado-txt">Jornada completada</div>
       <div class="estado-meta"><span>Entrada: ${fmtHora(entrada.hora)}</span><span>Salida: ${fmtHora(salida.hora)}</span></div>
       ${hrs !== null ? `<div class="estado-horas">${hrs.toFixed(2)} horas trabajadas</div>` : ''}
@@ -882,8 +899,8 @@ async function cargarMiHistorial() {
   if (!data?.length) { el.innerHTML = '<div class="muted">Sin registros recientes.</div>'; return }
   el.innerHTML = data.map(f => `
     <div class="hist-row">
-      <div><span class="tag-tipo ${f.tipo}">${f.tipo === 'entrada' ? '▶ Entrada' : '⏹ Salida'}</span><span class="muted">${fmtFecha(f.fecha)}</span></div>
-      <div><span>${fmtHora(f.hora)}</span><span class="tag-metodo">${f.verificado_facial ? '📷' : '✋'}</span></div>
+      <div><span class="tag-tipo ${f.tipo}">${f.tipo === 'entrada' ? 'Entrada' : 'Salida'}</span><span class="muted">${fmtFecha(f.fecha)}</span></div>
+      <div><span>${fmtHora(f.hora)}</span><span class="tag-metodo">${f.verificado_facial ? IC.facial : IC.manual}</span></div>
     </div>
   `).join('')
 }
@@ -894,7 +911,7 @@ async function abrirMiCam() {
     await registrarMiFichaje(false); return
   }
   document.getElementById('modal-mi-cam').style.display = 'flex'
-  document.getElementById('modal-mi-cam-titulo').textContent = miTipoActual === 'entrada' ? '▶ Verificar Entrada' : '⏹ Verificar Salida'
+  document.getElementById('modal-mi-cam-titulo').textContent = miTipoActual === 'entrada' ? 'Verificar Entrada' : 'Verificar Salida'
   document.getElementById('mi-cam-status').textContent = 'Iniciando cámara...'
   try {
     miCamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 } } })

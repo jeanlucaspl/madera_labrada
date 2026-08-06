@@ -67,6 +67,7 @@
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <script src="shared.js"></script>
   <script src="face.js"></script>
   <script>
@@ -93,6 +94,8 @@
 
       // Pre-cargar modelos face-api en background
       if (perfil.foto_descriptor) cargarModelosFace().catch(() => {})
+
+      lucide.createIcons()
     }
 
     // ── Cargar fichajes de hoy ───────────────────────────
@@ -115,35 +118,35 @@
 
       if (!entrada) {
         card.innerHTML = `
-          <div class="estado-icon">⏰</div>
+          <div class="estado-icon"></div>
           <div class="estado-txt">Sin registro hoy</div>
           <div class="estado-fecha">${fmtFecha(hoy())}</div>
         `
         tipoActual      = 'entrada'
-        btn.textContent = '▶  Marcar Entrada'
+        btn.textContent = 'Marcar Entrada'
         btn.className   = 'btn-marcar btn-entrada'
         btnWrap.style.display = 'block'
 
       } else if (!salida) {
         const hrs = diffHoras(entrada.hora, new Date().toISOString())
         card.innerHTML = `
-          <div class="estado-icon">✅</div>
+          <div class="estado-icon"></div>
           <div class="estado-txt">Entrada registrada</div>
           <div class="estado-meta">
-            <span>🕐 ${fmtHora(entrada.hora)}</span>
-            <span class="badge-facial">${entrada.verificado_facial ? '📷 Facial' : '✋ Manual'}</span>
+            <span>${fmtHora(entrada.hora)}</span>
+            <span class="badge-facial">${entrada.verificado_facial ? 'Facial' : 'Manual'}</span>
           </div>
           ${hrs !== null ? `<div class="estado-trabajando">En jornada: ${hrs.toFixed(1)} h</div>` : ''}
         `
         tipoActual      = 'salida'
-        btn.textContent = '⏹  Marcar Salida'
+        btn.textContent = 'Marcar Salida'
         btn.className   = 'btn-marcar btn-salida'
         btnWrap.style.display = 'block'
 
       } else {
         const hrs = diffHoras(entrada.hora, salida.hora)
         card.innerHTML = `
-          <div class="estado-icon">🏁</div>
+          <div class="estado-icon"></div>
           <div class="estado-txt">Jornada completada</div>
           <div class="estado-meta">
             <span>Entrada: ${fmtHora(entrada.hora)}</span>
@@ -171,12 +174,12 @@
       el.innerHTML = data.map(f => `
         <div class="hist-row">
           <div>
-            <span class="tag-tipo ${f.tipo}">${f.tipo === 'entrada' ? '▶ Entrada' : '⏹ Salida'}</span>
+            <span class="tag-tipo ${f.tipo}">${f.tipo === 'entrada' ? 'Entrada' : 'Salida'}</span>
             <span class="muted">${fmtFecha(f.fecha)}</span>
           </div>
           <div>
             <span>${fmtHora(f.hora)}</span>
-            <span class="tag-metodo" title="${f.verificado_facial ? 'Verificación facial' : 'Manual'}">${f.verificado_facial ? '📷' : '✋'}</span>
+            <span class="tag-metodo" title="${f.verificado_facial ? 'Verificación facial' : 'Manual'}">${f.verificado_facial ? 'Facial' : 'Manual'}</span>
           </div>
         </div>
       `).join('')
@@ -193,7 +196,7 @@
 
       document.getElementById('modal-cam').style.display = 'flex'
       document.getElementById('modal-cam-titulo').textContent =
-        tipoActual === 'entrada' ? '▶ Verificar Entrada' : '⏹ Verificar Salida'
+        tipoActual === 'entrada' ? 'Verificar Entrada' : 'Verificar Salida'
       document.getElementById('cam-status').textContent = 'Iniciando cámara...'
 
       try {
