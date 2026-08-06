@@ -42,6 +42,7 @@
     <button class="nav-item"        id="nav-personal"    onclick="showSection('personal')">    <span class="nav-icon">👥</span><span>Personal</span></button>
     <button class="nav-item"        id="nav-asistencias" onclick="showSection('asistencias')"> <span class="nav-icon">📋</span><span>Asistencias</span></button>
     <button class="nav-item"        id="nav-validar"     onclick="showSection('validar')">     <span class="nav-icon">✅</span><span>Validar Horas</span></button>
+    <button class="nav-item"        id="nav-mi-asistencia" onclick="showSection('mi-asistencia')"><span class="nav-icon">🕐</span><span>Mi Asistencia</span></button>
     <button class="nav-item nav-logout" onclick="cerrarSesion()">                              <span class="nav-icon">🚪</span><span>Salir</span></button>
   </nav>
 
@@ -118,7 +119,41 @@
       <div id="val-body"><div class="muted">Seleccioná una fecha.</div></div>
     </div>
 
+    <!-- ════════════════════════════════ MI ASISTENCIA ══ -->
+    <div id="sec-mi-asistencia" class="section">
+      <div class="section-title">🕐 Mi Asistencia</div>
+
+      <div class="card estado-card" id="mi-card-estado">
+        <div class="muted">Cargando...</div>
+      </div>
+
+      <div class="btn-wrap" id="mi-btn-wrap" style="display:none">
+        <button id="mi-btn-marcar" class="btn-marcar" onclick="abrirMiCam()"></button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Últimos registros</div>
+        <div id="mi-historial"><div class="muted">Cargando...</div></div>
+      </div>
+    </div>
+
   </main>
+</div>
+
+<!-- ══ MODAL: Verificación Facial (Mi Asistencia) ═════ -->
+<div id="modal-mi-cam" class="modal-overlay" style="display:none">
+  <div class="modal">
+    <div class="modal-title" id="modal-mi-cam-titulo">Verificación facial</div>
+    <div class="cam-wrap" id="mi-cam-wrap">
+      <video id="mi-cam-video" autoplay muted playsinline></video>
+      <canvas id="mi-cam-canvas"></canvas>
+    </div>
+    <div id="mi-cam-status" class="cam-status">Iniciando cámara...</div>
+    <div class="modal-footer-between">
+      <button onclick="cancelarMiCam()" class="btn-ghost">Cancelar</button>
+      <button onclick="registrarMiManual()" class="btn-warn">Registrar sin cámara</button>
+    </div>
+  </div>
 </div>
 
 <!-- ══ MODAL: Nuevo / Editar Empleado ══════════════════ -->
@@ -147,7 +182,15 @@
         <option value="noche">Noche</option>
       </select>
     </div>
-    <div class="field"><label>Área</label><input type="text" id="emp-area" placeholder="Recepción, Cocina, Limpieza..."></div>
+    <div class="field">
+      <label>Área</label>
+      <select id="emp-area">
+        <option value="">Sin asignar</option>
+        <option value="Recepción">Recepción</option>
+        <option value="Cocina">Cocina</option>
+        <option value="Limpieza">Limpieza</option>
+      </select>
+    </div>
 
     <p id="modal-emp-err" class="err-msg" style="display:none"></p>
 
@@ -238,10 +281,11 @@ function showSection(id) {
   document.getElementById('sec-' + id).classList.add('active')
   document.getElementById('nav-' + id)?.classList.add('active')
 
-  if (id === 'dashboard')   cargarDashboard()
-  if (id === 'personal')    renderPersonal()
-  if (id === 'asistencias') { poblarFiltrosAsist(); cargarAsistencias() }
-  if (id === 'validar')     cargarValidacion()
+  if (id === 'dashboard')      cargarDashboard()
+  if (id === 'personal')       renderPersonal()
+  if (id === 'asistencias')    { poblarFiltrosAsist(); cargarAsistencias() }
+  if (id === 'validar')        cargarValidacion()
+  if (id === 'mi-asistencia')  cargarMiAsistencia()
 }
 
 // ════════════════════════════════════════════════════════
@@ -439,7 +483,7 @@ async function abrirCamFoto() {
   document.getElementById('foto-cam-wrap').style.display = 'block'
   document.getElementById('foto-preview-wrap').style.display = 'none'
   try {
-    fotoCamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 } } })
+    fotoCamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 640 } } })
     const v = document.getElementById('foto-video')
     v.srcObject = fotoCamStream
     await v.play()
@@ -759,6 +803,135 @@ async function desvalidar(pid, fecha) {
   if (error) { showAlert('Error: ' + error.message, 'err'); return }
   showAlert('Validación revertida.', 'warn')
   cargarValidacion()
+}
+
+// ════════════════════════════════════════════════════════
+// MI ASISTENCIA (admin también es trabajador)
+// ════════════════════════════════════════════════════════
+let miFichajesHoy = []
+let miCamStream   = null
+let miStopVerif   = null
+let miTipoActual  = null
+
+async function cargarMiAsistencia() {
+  const { data } = await sb.from('fichajes')
+    .select('*')
+    .eq('personal_id', adminPerfil.id)
+    .eq('fecha', hoy())
+    .order('hora', { ascending: true })
+  miFichajesHoy = data ?? []
+  renderMiEstado()
+  await cargarMiHistorial()
+}
+
+function renderMiEstado() {
+  const entrada = miFichajesHoy.find(f => f.tipo === 'entrada')
+  const salida  = miFichajesHoy.find(f => f.tipo === 'salida')
+  const card    = document.getElementById('mi-card-estado')
+  const btnWrap = document.getElementById('mi-btn-wrap')
+  const btn     = document.getElementById('mi-btn-marcar')
+
+  if (!entrada) {
+    card.innerHTML = `<div class="estado-icon">⏰</div><div class="estado-txt">Sin registro hoy</div><div class="estado-fecha">${fmtFecha(hoy())}</div>`
+    miTipoActual      = 'entrada'
+    btn.textContent   = '▶  Marcar Entrada'
+    btn.className     = 'btn-marcar btn-entrada'
+    btnWrap.style.display = 'block'
+  } else if (!salida) {
+    const hrs = diffHoras(entrada.hora, new Date().toISOString())
+    card.innerHTML = `
+      <div class="estado-icon">✅</div>
+      <div class="estado-txt">Entrada registrada</div>
+      <div class="estado-meta"><span>🕐 ${fmtHora(entrada.hora)}</span><span class="badge-facial">${entrada.verificado_facial ? '📷 Facial' : '✋ Manual'}</span></div>
+      ${hrs !== null ? `<div class="estado-trabajando">En jornada: ${hrs.toFixed(1)} h</div>` : ''}
+    `
+    miTipoActual      = 'salida'
+    btn.textContent   = '⏹  Marcar Salida'
+    btn.className     = 'btn-marcar btn-salida'
+    btnWrap.style.display = 'block'
+  } else {
+    const hrs = diffHoras(entrada.hora, salida.hora)
+    card.innerHTML = `
+      <div class="estado-icon">🏁</div>
+      <div class="estado-txt">Jornada completada</div>
+      <div class="estado-meta"><span>Entrada: ${fmtHora(entrada.hora)}</span><span>Salida: ${fmtHora(salida.hora)}</span></div>
+      ${hrs !== null ? `<div class="estado-horas">${hrs.toFixed(2)} horas trabajadas</div>` : ''}
+    `
+    btnWrap.style.display = 'none'
+  }
+}
+
+async function cargarMiHistorial() {
+  const desde = new Date(); desde.setDate(desde.getDate() - 7)
+  const { data } = await sb.from('fichajes')
+    .select('*')
+    .eq('personal_id', adminPerfil.id)
+    .gte('fecha', desde.toISOString().slice(0, 10))
+    .order('hora', { ascending: false })
+
+  const el = document.getElementById('mi-historial')
+  if (!data?.length) { el.innerHTML = '<div class="muted">Sin registros recientes.</div>'; return }
+  el.innerHTML = data.map(f => `
+    <div class="hist-row">
+      <div><span class="tag-tipo ${f.tipo}">${f.tipo === 'entrada' ? '▶ Entrada' : '⏹ Salida'}</span><span class="muted">${fmtFecha(f.fecha)}</span></div>
+      <div><span>${fmtHora(f.hora)}</span><span class="tag-metodo">${f.verificado_facial ? '📷' : '✋'}</span></div>
+    </div>
+  `).join('')
+}
+
+async function abrirMiCam() {
+  if (!adminPerfil.foto_descriptor) {
+    if (!confirm(`No tenés foto facial registrada.\n¿Registrar ${miTipoActual} manualmente?`)) return
+    await registrarMiFichaje(false); return
+  }
+  document.getElementById('modal-mi-cam').style.display = 'flex'
+  document.getElementById('modal-mi-cam-titulo').textContent = miTipoActual === 'entrada' ? '▶ Verificar Entrada' : '⏹ Verificar Salida'
+  document.getElementById('mi-cam-status').textContent = 'Iniciando cámara...'
+  try {
+    miCamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 } } })
+    const video  = document.getElementById('mi-cam-video')
+    const canvas = document.getElementById('mi-cam-canvas')
+    video.srcObject = miCamStream
+    await video.play()
+    document.getElementById('mi-cam-status').textContent = 'Cargando modelos...'
+    miStopVerif = await iniciarVerificacion({
+      video, canvas,
+      descriptor: adminPerfil.foto_descriptor,
+      onStatus: msg => { document.getElementById('mi-cam-status').textContent = msg },
+      onMatch: async pct => {
+        document.getElementById('mi-cam-status').textContent = `✓ Verificado (${pct}% coincidencia)`
+        await new Promise(r => setTimeout(r, 1200))
+        cerrarMiCam()
+        await registrarMiFichaje(true)
+      }
+    })
+  } catch (e) {
+    document.getElementById('mi-cam-status').textContent = 'No se pudo acceder a la cámara.'
+  }
+}
+
+function cancelarMiCam() { if (miStopVerif) { miStopVerif(); miStopVerif = null } cerrarMiCam() }
+
+function cerrarMiCam() {
+  if (miCamStream) { miCamStream.getTracks().forEach(t => t.stop()); miCamStream = null }
+  const v = document.getElementById('mi-cam-video'); if (v) v.srcObject = null
+  document.getElementById('modal-mi-cam').style.display = 'none'
+}
+
+async function registrarMiManual() {
+  if (!confirm(`¿Confirmar ${miTipoActual} manualmente?`)) return
+  cancelarMiCam()
+  await registrarMiFichaje(false)
+}
+
+async function registrarMiFichaje(facial) {
+  const { error } = await sb.from('fichajes').insert({
+    personal_id: adminPerfil.id, tipo: miTipoActual,
+    fecha: hoy(), hora: new Date().toISOString(), verificado_facial: facial
+  })
+  if (error) { showAlert('Error: ' + error.message, 'err'); return }
+  showAlert(`${miTipoActual.charAt(0).toUpperCase() + miTipoActual.slice(1)} registrada.${facial ? '' : ' (manual)'}`, 'ok')
+  await cargarMiAsistencia()
 }
 
 // ════════════════════════════════════════════════════════
