@@ -226,7 +226,8 @@
       </div>
       <div class="cam-action-btns">
         <button onclick="capturarFoto()" class="btn-primary btn-sm">Capturar</button>
-        <button onclick="cerrarCamFoto()" class="btn-ghost btn-sm">Cancelar cámara</button>
+        <button onclick="voltearCamFoto()" class="btn-ghost btn-sm" title="Voltear cámara"><i data-lucide="flip-horizontal-2" style="vertical-align:middle;"></i></button>
+        <button onclick="cerrarCamFoto()" class="btn-ghost btn-sm">Cancelar</button>
       </div>
     </div>
 
@@ -274,7 +275,8 @@ let adminPerfil   = null
 let allPersonal   = []    // cache de perfiles
 let fotoEmpleadoId = null // ID del empleado al que se registra foto
 let fotoBlob      = null  // Blob de la foto capturada/seleccionada
-let fotoCamStream = null  // Stream de la cámara del modal foto
+let fotoCamStream    = null  // Stream de la cámara del modal foto
+let fotoFacingMode  = 'environment'  // cámara trasera por defecto para tomar fotos de empleados
 
 // ── Init ─────────────────────────────────────────────────
 async function init() {
@@ -512,7 +514,19 @@ async function abrirCamFoto() {
   document.getElementById('foto-cam-wrap').style.display = 'block'
   document.getElementById('foto-preview-wrap').style.display = 'none'
   try {
-    fotoCamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 640 } } })
+    fotoCamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: fotoFacingMode, width: { ideal: 640 } } })
+    const v = document.getElementById('foto-video')
+    v.srcObject = fotoCamStream
+    await v.play()
+    lucide.createIcons()
+  } catch { document.getElementById('foto-status').textContent = 'No se pudo acceder a la cámara.' }
+}
+
+async function voltearCamFoto() {
+  if (fotoCamStream) { fotoCamStream.getTracks().forEach(t => t.stop()); fotoCamStream = null }
+  fotoFacingMode = fotoFacingMode === 'environment' ? 'user' : 'environment'
+  try {
+    fotoCamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: fotoFacingMode, width: { ideal: 640 } } })
     const v = document.getElementById('foto-video')
     v.srcObject = fotoCamStream
     await v.play()
