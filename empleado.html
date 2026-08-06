@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Madera Labrada</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .emp-nombre { font-size: 14px; font-weight: 600; color: var(--text); max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  </style>
+</head>
+<body>
+  <div id="global-alert" class="global-alert" style="display:none"></div>
+
+  <!-- ── Header ── -->
+  <header class="header">
+    <div class="header-brand"><img src="madera_labrada_logo-removebg-preview.png" alt="Madera Labrada" style="height:28px; vertical-align:middle;"></div>
+    <div class="header-user">
+      <span class="emp-nombre" id="h-nombre"></span>
+      <button onclick="cerrarSesion()" class="btn-ghost-sm">Salir</button>
+    </div>
+  </header>
+
+  <!-- ── Contenido principal ── -->
+  <main class="emp-main">
+
+    <!-- Turno / Área -->
+    <div class="emp-meta" id="emp-meta"></div>
+
+    <!-- Estado del día -->
+    <div class="card estado-card" id="card-estado">
+      <div class="muted">Cargando...</div>
+    </div>
+
+    <!-- Botón marcar -->
+    <div class="btn-wrap" id="btn-wrap" style="display:none">
+      <button id="btn-marcar" class="btn-marcar" onclick="abrirModalCam()"></button>
+    </div>
+
+    <!-- Historial reciente -->
+    <div class="card">
+      <div class="card-title">Últimos registros</div>
+      <div id="historial"><div class="muted">Cargando...</div></div>
+    </div>
+
+  </main>
+
+  <!-- ── Modal: Verificación Facial ── -->
+  <div id="modal-cam" class="modal-overlay" style="display:none">
+    <div class="modal">
+      <div class="modal-title" id="modal-cam-titulo">Verificación facial</div>
+
+      <div class="cam-wrap" id="cam-wrap">
+        <video id="cam-video" autoplay muted playsinline></video>
+        <canvas id="cam-canvas"></canvas>
+      </div>
+
+      <div id="cam-status" class="cam-status">Iniciando cámara...</div>
+
+      <div class="modal-footer-between">
+        <button onclick="cancelarCam()" class="btn-ghost">Cancelar</button>
+        <button onclick="registrarManual()" class="btn-warn">Registrar sin cámara</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.js"></script>
+  <script src="shared.js"></script>
+  <script src="face.js"></script>
+  <script>
+    let perfil      = null
+    let fichajesHoy = []
+    let camStream   = null
+    let stopVerif   = null
+    let tipoActual  = null   // 'entrada' | 'salida'
+
+    // ── Init ────────────────────────────────────────────
+    async function init() {
+      perfil = await requireAuth('empleado')
+      if (!perfil) return
+
+      document.getElementById('h-nombre').textContent = `${perfil.nombre} ${perfil.apellido}`
+
+      const badges = []
+      if (perfil.turno) badges.push(`<span class="badge">Turno: ${perfil.turno}</span>`)
+      if (perfil.area)  badges.push(`<span class="badge">${perfil.area}</span>`)
+      document.getElementById('emp-meta').innerHTML = badges.join('')
+
+      await cargarHoy()
+      await cargarHistorial()
+
+      // Pre-cargar modelos face-api en background
+      if (perfil.foto_descriptor) cargarModelosFace().catch(() => {})
+    }
+
+    // ── Cargar fichajes de hoy ───────────────────────────
+    async function cargarHoy() {
+      const { data } = await sb.from('fichajes')
+        .select('*')
+        .eq('personal_id', perfil.id)
+        .eq('fecha', hoy())
+        .order('hora', { ascending: true })
+      fichajesHoy = data ?? []
+      renderEstado()
+    }
+
+    function renderEstado() {
+      const entrada = fichajesHoy.find(f => f.tipo === 'entrada')
+      const salida  = fichajesHoy.find(f => f.tipo === 'salida')
+      const card    = document.getElementById('card-estado')
+      const btnWrap = document.getElementById('btn-wrap')
+      const btn     = document.getElementById('btn-marcar')
+
+      if (!entrada) {
+        card.innerHTML = `
+          <div class="estado-icon">⏰</div>
+          <div class="estado-txt">Sin registro hoy</div>
+          <div class="estado-fecha">${fmtFecha(hoy())}</div>
+        `
+        tipoActual      = 'entrada'
+        btn.textContent = '▶  Marcar Entrada'
+        btn.className   = 'btn-marcar btn-entrada'
+        btnWrap.style.display = 'block'
+
+      } else if (!salida) {
+        const hrs = diffHoras(entrada.hora, new Date().toISOString())
+        card.innerHTML = `
+          <div class="estado-icon">✅</div>
+          <div class="estado-txt">Entrada registrada</div>
+          <div class="estado-meta">
+            <span>🕐 ${fmtHora(entrada.hora)}</span>
+            <span class="badge-facial">${entrada.verificado_facial ? '📷 Facial' : '✋ Manual'}</span>
+          </div>
+          ${hrs !== null ? `<div class="estado-trabajando">En jornada: ${hrs.toFixed(1)} h</div>` : ''}
+        `
+        tipoActual      = 'salida'
+        btn.textContent = '⏹  Marcar Salida'
+        btn.className   = 'btn-marcar btn-salida'
+        btnWrap.style.display = 'block'
+
+      } else {
+        const hrs = diffHoras(entrada.hora, salida.hora)
+        card.innerHTML = `
+          <div class="estado-icon">🏁</div>
+          <div class="estado-txt">Jornada completada</div>
+          <div class="estado-meta">
+            <span>Entrada: ${fmtHora(entrada.hora)}</span>
+            <span>Salida: ${fmtHora(salida.hora)}</span>
+          </div>
+          ${hrs !== null ? `<div class="estado-horas">${hrs.toFixed(2)} horas trabajadas</div>` : ''}
+        `
+        btnWrap.style.display = 'none'
+      }
+    }
+
+    // ── Cargar historial (últimos 7 días) ────────────────
+    async function cargarHistorial() {
+      const desde = new Date()
+      desde.setDate(desde.getDate() - 7)
+      const { data } = await sb.from('fichajes')
+        .select('*')
+        .eq('personal_id', perfil.id)
+        .gte('fecha', desde.toISOString().slice(0, 10))
+        .order('hora', { ascending: false })
+
+      const el = document.getElementById('historial')
+      if (!data?.length) { el.innerHTML = '<div class="muted">Sin registros recientes.</div>'; return }
+
+      el.innerHTML = data.map(f => `
+        <div class="hist-row">
+          <div>
+            <span class="tag-tipo ${f.tipo}">${f.tipo === 'entrada' ? '▶ Entrada' : '⏹ Salida'}</span>
+            <span class="muted">${fmtFecha(f.fecha)}</span>
+          </div>
+          <div>
+            <span>${fmtHora(f.hora)}</span>
+            <span class="tag-metodo" title="${f.verificado_facial ? 'Verificación facial' : 'Manual'}">${f.verificado_facial ? '📷' : '✋'}</span>
+          </div>
+        </div>
+      `).join('')
+    }
+
+    // ── Abrir cámara / modal ─────────────────────────────
+    async function abrirModalCam() {
+      // Sin descriptor: ofrecer solo manual
+      if (!perfil.foto_descriptor) {
+        if (!confirm(`No tenés foto facial registrada.\n¿Registrar ${tipoActual} manualmente?`)) return
+        await registrarFichaje(false)
+        return
+      }
+
+      document.getElementById('modal-cam').style.display = 'flex'
+      document.getElementById('modal-cam-titulo').textContent =
+        tipoActual === 'entrada' ? '▶ Verificar Entrada' : '⏹ Verificar Salida'
+      document.getElementById('cam-status').textContent = 'Iniciando cámara...'
+
+      try {
+        camStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user', width: { ideal: 640 } }
+        })
+        const video  = document.getElementById('cam-video')
+        const canvas = document.getElementById('cam-canvas')
+        video.srcObject = camStream
+        await video.play()
+
+        document.getElementById('cam-status').textContent = 'Cargando modelos de reconocimiento...'
+
+        stopVerif = await iniciarVerificacion({
+          video,
+          canvas,
+          descriptor: perfil.foto_descriptor,
+          onStatus: msg => { document.getElementById('cam-status').textContent = msg },
+          onMatch: async pct => {
+            document.getElementById('cam-status').textContent = `✓ Verificado (${pct}% coincidencia)`
+            await new Promise(r => setTimeout(r, 1200))
+            cerrarCam()
+            await registrarFichaje(true)
+          }
+        })
+      } catch (e) {
+        document.getElementById('cam-status').textContent = 'No se pudo acceder a la cámara.'
+        console.error(e)
+      }
+    }
+
+    function cancelarCam() {
+      if (stopVerif) { stopVerif(); stopVerif = null }
+      cerrarCam()
+    }
+
+    function cerrarCam() {
+      if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null }
+      const v = document.getElementById('cam-video')
+      if (v) v.srcObject = null
+      document.getElementById('modal-cam').style.display = 'none'
+    }
+
+    async function registrarManual() {
+      if (!confirm(`¿Confirmar ${tipoActual} manualmente?`)) return
+      cancelarCam()
+      await registrarFichaje(false)
+    }
+
+    // ── Registrar fichaje en DB ──────────────────────────
+    async function registrarFichaje(facial) {
+      const { error } = await sb.from('fichajes').insert({
+        personal_id:      perfil.id,
+        tipo:             tipoActual,
+        fecha:            hoy(),
+        hora:             new Date().toISOString(),
+        verificado_facial: facial
+      })
+      if (error) { showAlert('Error al registrar: ' + error.message, 'err'); return }
+
+      const tipoLabel = tipoActual.charAt(0).toUpperCase() + tipoActual.slice(1)
+      showAlert(`${tipoLabel} registrada.${facial ? '' : ' (manual)'}`, 'ok')
+      await cargarHoy()
+      await cargarHistorial()
+    }
+
+    async function cerrarSesion() {
+      await sb.auth.signOut()
+      location.href = 'login.html'
+    }
+
+    init()
+  </script>
+</body>
+</html>

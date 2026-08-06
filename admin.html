@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Madera Labrada — Admin</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Extras específicos de admin */
+    .emp-name-cell { display: flex; align-items: center; gap: 10px; }
+    .val-nombre { font-weight: 600; font-size: 14px; }
+    .val-meta   { font-size: 12px; color: var(--muted); }
+    .horas-input {
+      width: 70px; background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); border-radius: var(--radius-sm); padding: 5px 8px;
+      font-size: 14px; text-align: center;
+    }
+    .nota-input {
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); border-radius: var(--radius-sm); padding: 5px 8px;
+      font-size: 13px; resize: none;
+    }
+    .val-table { width: 100%; border-collapse: collapse; }
+    .val-table th { background: var(--surface); color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; padding: 8px 10px; text-align: left; }
+    .val-table td { padding: 12px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .val-table tr:last-child td { border-bottom: none; }
+    .val-row-validado td { background: var(--ok-bg); }
+    .cam-action-btns { display: flex; gap: 8px; margin-bottom: 10px; }
+    .foto-preview { width: 100%; max-height: 200px; object-fit: cover; border-radius: var(--radius-sm); margin-bottom: 8px; }
+    .no-data { text-align: center; padding: 32px; color: var(--muted); font-size: 14px; }
+    .section-fecha { font-size: 13px; color: var(--muted); font-weight: 400; margin-left: 8px; }
+  </style>
+</head>
+<body>
+<div id="global-alert" class="global-alert" style="display:none"></div>
+
+<div class="app-layout">
+  <!-- ── Sidebar ── -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><img src="madera_labrada_logo-removebg-preview.png" alt="Madera Labrada" style="height:32px; vertical-align:middle;"></div>
+    <button class="nav-item active" id="nav-dashboard"   onclick="showSection('dashboard')">   <span class="nav-icon">📊</span><span>Dashboard</span></button>
+    <button class="nav-item"        id="nav-personal"    onclick="showSection('personal')">    <span class="nav-icon">👥</span><span>Personal</span></button>
+    <button class="nav-item"        id="nav-asistencias" onclick="showSection('asistencias')"> <span class="nav-icon">📋</span><span>Asistencias</span></button>
+    <button class="nav-item"        id="nav-validar"     onclick="showSection('validar')">     <span class="nav-icon">✅</span><span>Validar Horas</span></button>
+    <button class="nav-item nav-logout" onclick="cerrarSesion()">                              <span class="nav-icon">🚪</span><span>Salir</span></button>
+  </nav>
+
+  <!-- ── Contenido ── -->
+  <main class="main-content">
+
+    <!-- ════════════════════════════════ DASHBOARD ══ -->
+    <div id="sec-dashboard" class="section active">
+      <div class="section-title">📊 Dashboard <span class="section-fecha" id="dash-fecha"></span></div>
+
+      <div class="stats-grid" id="dash-stats">
+        <div class="stat-card"><div class="stat-num" id="st-total">—</div><div class="stat-label">Personal activo</div></div>
+        <div class="stat-card"><div class="stat-num" id="st-presentes">—</div><div class="stat-label">Con entrada hoy</div></div>
+        <div class="stat-card"><div class="stat-num" id="st-jornada">—</div><div class="stat-label">En jornada</div></div>
+        <div class="stat-card"><div class="stat-num" id="st-sinreg">—</div><div class="stat-label">Sin registro</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Fichajes de hoy</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Empleado</th><th>Área</th><th>Turno</th><th>Entrada</th><th>Salida</th><th>Horas</th></tr></thead>
+            <tbody id="dash-tabla"></tbody>
+          </table>
+        </div>
+        <div id="dash-nodata" class="no-data" style="display:none">Sin fichajes hoy.</div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ PERSONAL ══ -->
+    <div id="sec-personal" class="section">
+      <div class="section-title">👥 Personal</div>
+      <div class="section-topbar">
+        <input type="text" class="search-input" id="pers-search" placeholder="🔍 Buscar por nombre o DNI..." oninput="filtrarPersonal()">
+        <button class="btn-primary" onclick="abrirModalNuevo()">+ Nuevo empleado</button>
+      </div>
+      <div class="card" style="padding:0; overflow:hidden;">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Foto</th><th>Nombre</th><th>DNI</th><th>Turno</th><th>Área</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="pers-tabla"></tbody>
+          </table>
+        </div>
+        <div id="pers-nodata" class="no-data" style="display:none">Sin personal registrado.</div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════ ASISTENCIAS ══ -->
+    <div id="sec-asistencias" class="section">
+      <div class="section-title">📋 Asistencias</div>
+      <div class="filtros">
+        <div class="field"><label>Desde</label><input type="date" id="asist-desde" onchange="cargarAsistencias()"></div>
+        <div class="field"><label>Hasta</label><input type="date" id="asist-hasta" onchange="cargarAsistencias()"></div>
+        <div class="field"><label>Empleado</label>
+          <select id="asist-emp" onchange="cargarAsistencias()">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <div class="field"><label>Área</label>
+          <select id="asist-area" onchange="cargarAsistencias()">
+            <option value="">Todas</option>
+          </select>
+        </div>
+      </div>
+      <div id="asist-body"><div class="muted">Seleccioná un rango de fechas.</div></div>
+    </div>
+
+    <!-- ════════════════════════════════ VALIDAR HORAS ══ -->
+    <div id="sec-validar" class="section">
+      <div class="section-title">✅ Validar Horas</div>
+      <div class="filtros" style="margin-bottom:20px">
+        <div class="field"><label>Fecha</label><input type="date" id="val-fecha" onchange="cargarValidacion()"></div>
+      </div>
+      <div id="val-body"><div class="muted">Seleccioná una fecha.</div></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ══ MODAL: Nuevo / Editar Empleado ══════════════════ -->
+<div id="modal-empleado" class="modal-overlay" style="display:none">
+  <div class="modal">
+    <div class="modal-title" id="modal-emp-titulo">Nuevo Empleado</div>
+    <input type="hidden" id="emp-id">
+
+    <div class="field"><label>Nombre *</label><input type="text" id="emp-nombre" placeholder="Juan"></div>
+    <div class="field"><label>Apellido *</label><input type="text" id="emp-apellido" placeholder="Pérez"></div>
+    <div class="field"><label>DNI * <span style="color:var(--muted);font-weight:400">(se usa para iniciar sesión)</span></label><input type="text" id="emp-dni" placeholder="12345678" inputmode="numeric" maxlength="20"></div>
+    <div class="field" id="campo-pass"><label>Contraseña *</label><input type="password" id="emp-pass" placeholder="Contraseña temporal"></div>
+    <div class="field">
+      <label>Rol *</label>
+      <select id="emp-rol">
+        <option value="empleado">Empleado</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Turno</label>
+      <select id="emp-turno">
+        <option value="">Sin asignar</option>
+        <option value="mañana">Mañana</option>
+        <option value="tarde">Tarde</option>
+        <option value="noche">Noche</option>
+      </select>
+    </div>
+    <div class="field"><label>Área</label><input type="text" id="emp-area" placeholder="Recepción, Cocina, Limpieza..."></div>
+
+    <p id="modal-emp-err" class="err-msg" style="display:none"></p>
+
+    <div class="modal-footer">
+      <button onclick="cerrarModalEmpleado()" class="btn-ghost">Cancelar</button>
+      <button onclick="guardarEmpleado()" class="btn-primary" id="btn-guardar-emp">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Registrar Foto ═══════════════════════════ -->
+<div id="modal-foto" class="modal-overlay" style="display:none">
+  <div class="modal">
+    <div class="modal-title" id="modal-foto-titulo">Foto facial</div>
+
+    <!-- Preview foto actual o captura -->
+    <div class="foto-wrap" id="foto-preview-wrap">
+      <div class="foto-placeholder" id="foto-placeholder">👤</div>
+      <img id="foto-preview-img" style="display:none; width:120px; height:120px; border-radius:50%; object-fit:cover; border:3px solid var(--accent);" alt="preview">
+    </div>
+
+    <!-- Vista cámara -->
+    <div id="foto-cam-wrap" style="display:none">
+      <div class="cam-wrap" style="margin-bottom:8px;">
+        <video id="foto-video" autoplay muted playsinline></video>
+        <canvas id="foto-canvas-preview" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%;"></canvas>
+      </div>
+      <div class="cam-action-btns">
+        <button onclick="capturarFoto()" class="btn-primary btn-sm">📷 Capturar</button>
+        <button onclick="cerrarCamFoto()" class="btn-ghost btn-sm">Cancelar cámara</button>
+      </div>
+    </div>
+
+    <div class="cam-action-btns">
+      <button onclick="abrirCamFoto()" class="btn-ghost btn-sm" id="btn-abrir-cam-foto">📷 Abrir cámara</button>
+      <label class="btn-ghost btn-sm" style="cursor:pointer; display:inline-flex; align-items:center;">
+        📁 Subir archivo
+        <input type="file" id="foto-archivo" accept="image/*" style="display:none" onchange="desdeArchivo(event)">
+      </label>
+    </div>
+
+    <div id="foto-status" class="cam-status"></div>
+
+    <div class="modal-footer">
+      <button onclick="cerrarModalFoto()" class="btn-ghost">Cancelar</button>
+      <button onclick="guardarFoto()" class="btn-primary" id="btn-guardar-foto" disabled>Guardar foto</button>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.js"></script>
+<script src="shared.js"></script>
+<script src="face.js"></script>
+<script>
+// ════════════════════════════════════════════════════════
+// ESTADO GLOBAL
+// ════════════════════════════════════════════════════════
+let adminPerfil   = null
+let allPersonal   = []    // cache de perfiles
+let fotoEmpleadoId = null // ID del empleado al que se registra foto
+let fotoBlob      = null  // Blob de la foto capturada/seleccionada
+let fotoCamStream = null  // Stream de la cámara del modal foto
+
+// ── Init ─────────────────────────────────────────────────
+async function init() {
+  adminPerfil = await requireAuth('admin')
+  if (!adminPerfil) return
+
+  document.getElementById('dash-fecha').textContent = fmtFecha(hoy())
+
+  // Defaults de fechas en filtros
+  document.getElementById('asist-desde').value = hoy()
+  document.getElementById('asist-hasta').value = hoy()
+  document.getElementById('val-fecha').value   = hoy()
+
+  await cargarPersonal()   // carga base antes de mostrar dashboard
+  showSection('dashboard')
+}
+
+// ════════════════════════════════════════════════════════
+// NAVEGACIÓN
+// ════════════════════════════════════════════════════════
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'))
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'))
+  document.getElementById('sec-' + id).classList.add('active')
+  document.getElementById('nav-' + id)?.classList.add('active')
+
+  if (id === 'dashboard')   cargarDashboard()
+  if (id === 'personal')    renderPersonal()
+  if (id === 'asistencias') { poblarFiltrosAsist(); cargarAsistencias() }
+  if (id === 'validar')     cargarValidacion()
+}
+
+// ════════════════════════════════════════════════════════
+// PERSONAL — carga y render
+// ════════════════════════════════════════════════════════
+async function cargarPersonal() {
+  const { data } = await sb.from('perfiles').select('*').order('apellido')
+  allPersonal = data ?? []
+  poblarFiltrosAsist()
+}
+
+function filtrarPersonal() {
+  const q = document.getElementById('pers-search').value.toLowerCase().trim()
+  const filtrado = q
+    ? allPersonal.filter(p => `${p.nombre} ${p.apellido}`.toLowerCase().includes(q) || (p.dni && p.dni.includes(q)))
+    : allPersonal
+  renderTablaPersonal(filtrado)
+}
+
+function renderPersonal() { renderTablaPersonal(allPersonal) }
+
+function renderTablaPersonal(lista) {
+  const tbody   = document.getElementById('pers-tabla')
+  const nodata  = document.getElementById('pers-nodata')
+
+  if (!lista.length) { tbody.innerHTML = ''; nodata.style.display = 'block'; return }
+  nodata.style.display = 'none'
+
+  tbody.innerHTML = lista.map(p => `
+    <tr>
+      <td>
+        ${p.foto_url
+          ? `<img src="${p.foto_url}" class="mini-foto" alt="">`
+          : `<div class="mini-foto-placeholder">👤</div>`}
+      </td>
+      <td><strong>${p.apellido}</strong>, ${p.nombre}</td>
+      <td class="muted">${p.dni || '—'}</td>
+      <td>${p.turno ? `<span class="tag tag-muted">${p.turno}</span>` : '<span class="muted">—</span>'}</td>
+      <td>${p.area || '<span class="muted">—</span>'}</td>
+      <td><span class="tag ${p.rol === 'admin' ? 'tag-warn' : 'tag-muted'}">${p.rol}</span></td>
+      <td><span class="tag ${p.activo ? 'tag-ok' : 'tag-err'}">${p.activo ? 'Activo' : 'Inactivo'}</span></td>
+      <td>
+        <div class="actions">
+          <button onclick="abrirModalEditar('${p.id}')" class="btn-ghost btn-sm" title="Editar">✏️</button>
+          <button onclick="abrirModalFoto('${p.id}')"   class="btn-ghost btn-sm" title="Foto facial">${p.foto_descriptor ? '📷' : '📷'}</button>
+          <button onclick="toggleActivo('${p.id}', ${p.activo})" class="btn-ghost btn-sm" title="${p.activo ? 'Desactivar' : 'Activar'}">${p.activo ? '🔴' : '🟢'}</button>
+          <button onclick="eliminarEmpleado('${p.id}', '${p.nombre} ${p.apellido}')" class="btn-danger btn-sm" title="Eliminar">🗑</button>
+        </div>
+      </td>
+    </tr>
+  `).join('')
+}
+
+// ── Nuevo empleado ─────────────────────────────────────
+function abrirModalNuevo() {
+  document.getElementById('modal-emp-titulo').textContent = 'Nuevo Empleado'
+  document.getElementById('emp-id').value       = ''
+  document.getElementById('emp-nombre').value   = ''
+  document.getElementById('emp-apellido').value = ''
+  document.getElementById('emp-dni').value      = ''
+  document.getElementById('emp-pass').value     = ''
+  document.getElementById('emp-rol').value      = 'empleado'
+  document.getElementById('emp-turno').value    = ''
+  document.getElementById('emp-area').value     = ''
+  document.getElementById('campo-pass').style.display = 'block'
+  document.getElementById('modal-emp-err').style.display = 'none'
+  document.getElementById('modal-empleado').style.display = 'flex'
+}
+
+function abrirModalEditar(id) {
+  const p = allPersonal.find(x => x.id === id)
+  if (!p) return
+  document.getElementById('modal-emp-titulo').textContent = 'Editar Empleado'
+  document.getElementById('emp-id').value       = p.id
+  document.getElementById('emp-nombre').value   = p.nombre
+  document.getElementById('emp-apellido').value = p.apellido
+  document.getElementById('emp-dni').value      = p.dni || ''
+  document.getElementById('emp-rol').value      = p.rol
+  document.getElementById('emp-turno').value    = p.turno || ''
+  document.getElementById('emp-area').value     = p.area || ''
+  document.getElementById('campo-pass').style.display = 'none'
+  document.getElementById('modal-emp-err').style.display = 'none'
+  document.getElementById('modal-empleado').style.display = 'flex'
+}
+
+function cerrarModalEmpleado() {
+  document.getElementById('modal-empleado').style.display = 'none'
+}
+
+async function guardarEmpleado() {
+  const id       = document.getElementById('emp-id').value
+  const nombre   = document.getElementById('emp-nombre').value.trim()
+  const apellido = document.getElementById('emp-apellido').value.trim()
+  const dni      = document.getElementById('emp-dni').value.trim()
+  const pass     = document.getElementById('emp-pass').value
+  const rol      = document.getElementById('emp-rol').value
+  const turno    = document.getElementById('emp-turno').value || null
+  const area     = document.getElementById('emp-area').value.trim() || null
+  const errEl    = document.getElementById('modal-emp-err')
+  const btn      = document.getElementById('btn-guardar-emp')
+
+  errEl.style.display = 'none'
+  if (!nombre || !apellido) { errEl.textContent = 'Nombre y apellido son obligatorios.'; errEl.style.display = 'block'; return }
+
+  btn.disabled = true; btn.textContent = 'Guardando...'
+
+  try {
+    if (!id) {
+      // ── Crear usuario nuevo ──
+      if (!dni)  { errEl.textContent = 'El DNI es obligatorio (se usa para iniciar sesión).'; errEl.style.display = 'block'; btn.disabled = false; btn.textContent = 'Guardar'; return }
+      if (!pass) { errEl.textContent = 'La contraseña es obligatoria para nuevo empleado.'; errEl.style.display = 'block'; btn.disabled = false; btn.textContent = 'Guardar'; return }
+
+      const email = `${dni}@maderalabrada.pe`   // email ficticio interno
+
+      // Cliente temporal para no perder sesión del admin
+      const temp = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false, storageKey: 'ml_tmp_' + Date.now() }
+      })
+      const { data: signUpData, error: signUpErr } = await temp.auth.signUp({ email, password: pass })
+      if (signUpErr) throw new Error(signUpErr.message)
+
+      const uid = signUpData.user?.id
+      if (!uid) throw new Error('No se obtuvo el ID del usuario. Verificá si el email ya existe.')
+
+      const { error: perfErr } = await sb.from('perfiles').insert({ id: uid, nombre, apellido, dni: dni || null, rol, turno, area })
+      if (perfErr) throw new Error(perfErr.message)
+
+    } else {
+      // ── Editar empleado existente ──
+      const { error } = await sb.from('perfiles').update({ nombre, apellido, dni: dni || null, rol, turno, area }).eq('id', id)
+      if (error) throw new Error(error.message)
+    }
+
+    cerrarModalEmpleado()
+    showAlert(!id ? 'Empleado creado correctamente.' : 'Datos actualizados.', 'ok')
+    await cargarPersonal()
+    renderPersonal()
+
+  } catch (e) {
+    errEl.textContent = e.message
+    errEl.style.display = 'block'
+  } finally {
+    btn.disabled = false; btn.textContent = 'Guardar'
+  }
+}
+
+async function toggleActivo(id, estadoActual) {
+  const nuevo = !estadoActual
+  const { error } = await sb.from('perfiles').update({ activo: nuevo }).eq('id', id)
+  if (error) { showAlert('Error: ' + error.message, 'err'); return }
+  showAlert(`Empleado ${nuevo ? 'activado' : 'desactivado'}.`, 'ok')
+  await cargarPersonal(); renderPersonal()
+}
+
+async function eliminarEmpleado(id, nombre) {
+  if (!confirm(`¿Eliminar a "${nombre}"?\nEsta acción no se puede deshacer y eliminará todos sus fichajes.`)) return
+  const { error } = await sb.from('perfiles').delete().eq('id', id)
+  if (error) { showAlert('Error al eliminar: ' + error.message, 'err'); return }
+  showAlert('Empleado eliminado.', 'ok')
+  await cargarPersonal(); renderPersonal()
+}
+
+// ════════════════════════════════════════════════════════
+// MODAL FOTO FACIAL
+// ════════════════════════════════════════════════════════
+function abrirModalFoto(id) {
+  fotoEmpleadoId = id
+  fotoBlob = null
+  const p = allPersonal.find(x => x.id === id)
+
+  document.getElementById('modal-foto-titulo').textContent = `Foto — ${p?.apellido}, ${p?.nombre}`
+  document.getElementById('foto-status').textContent = ''
+  document.getElementById('btn-guardar-foto').disabled = true
+  document.getElementById('foto-cam-wrap').style.display = 'none'
+
+  const img  = document.getElementById('foto-preview-img')
+  const plac = document.getElementById('foto-placeholder')
+  if (p?.foto_url) {
+    img.src = p.foto_url; img.style.display = 'block'; plac.style.display = 'none'
+  } else {
+    img.style.display = 'none'; plac.style.display = 'inline-flex'
+  }
+
+  document.getElementById('foto-archivo').value = ''
+  document.getElementById('modal-foto').style.display = 'flex'
+}
+
+function cerrarModalFoto() {
+  cerrarCamFoto()
+  fotoBlob = null
+  document.getElementById('modal-foto').style.display = 'none'
+}
+
+async function abrirCamFoto() {
+  document.getElementById('foto-cam-wrap').style.display = 'block'
+  document.getElementById('foto-preview-wrap').style.display = 'none'
+  try {
+    fotoCamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 } } })
+    const v = document.getElementById('foto-video')
+    v.srcObject = fotoCamStream
+    await v.play()
+  } catch { document.getElementById('foto-status').textContent = 'No se pudo acceder a la cámara.' }
+}
+
+function cerrarCamFoto() {
+  if (fotoCamStream) { fotoCamStream.getTracks().forEach(t => t.stop()); fotoCamStream = null }
+  const v = document.getElementById('foto-video'); if (v) v.srcObject = null
+  document.getElementById('foto-cam-wrap').style.display = 'none'
+  document.getElementById('foto-preview-wrap').style.display = 'block'
+}
+
+function capturarFoto() {
+  const v = document.getElementById('foto-video')
+  const c = document.createElement('canvas')
+  c.width = v.videoWidth; c.height = v.videoHeight
+  c.getContext('2d').drawImage(v, 0, 0)
+  c.toBlob(blob => {
+    fotoBlob = blob
+    const img  = document.getElementById('foto-preview-img')
+    const plac = document.getElementById('foto-placeholder')
+    img.src    = URL.createObjectURL(blob)
+    img.style.display  = 'block'
+    plac.style.display = 'none'
+    document.getElementById('btn-guardar-foto').disabled = false
+    cerrarCamFoto()
+  }, 'image/jpeg', 0.92)
+}
+
+function desdeArchivo(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  fotoBlob = file
+  const img  = document.getElementById('foto-preview-img')
+  const plac = document.getElementById('foto-placeholder')
+  img.src    = URL.createObjectURL(file)
+  img.style.display  = 'block'
+  plac.style.display = 'none'
+  document.getElementById('btn-guardar-foto').disabled = false
+  cerrarCamFoto()
+}
+
+async function guardarFoto() {
+  if (!fotoBlob || !fotoEmpleadoId) return
+  const btn = document.getElementById('btn-guardar-foto')
+  const statusEl = document.getElementById('foto-status')
+  btn.disabled = true
+
+  statusEl.textContent = 'Subiendo foto...'
+  const ext  = fotoBlob.type === 'image/png' ? 'png' : 'jpg'
+  const path = `${fotoEmpleadoId}.${ext}`
+
+  const { error: upErr } = await sb.storage.from('fotos-personal').upload(path, fotoBlob, { upsert: true, contentType: fotoBlob.type })
+  if (upErr) { statusEl.textContent = 'Error al subir: ' + upErr.message; btn.disabled = false; return }
+
+  const { data: { publicUrl } } = sb.storage.from('fotos-personal').getPublicUrl(path)
+  const foto_url = publicUrl + '?t=' + Date.now()
+
+  statusEl.textContent = 'Calculando descriptor facial...'
+  const descriptor = await computarDescriptor(fotoBlob)
+  if (!descriptor) statusEl.textContent = 'No se detectó un rostro — foto guardada sin reconocimiento facial.'
+  else statusEl.textContent = 'Descriptor calculado correctamente.'
+
+  const payload = { foto_url }
+  if (descriptor) payload.foto_descriptor = descriptor
+
+  const { error: updErr } = await sb.from('perfiles').update(payload).eq('id', fotoEmpleadoId)
+  if (updErr) { statusEl.textContent = 'Error al guardar: ' + updErr.message; btn.disabled = false; return }
+
+  showAlert(descriptor ? 'Foto y reconocimiento facial guardados.' : 'Foto guardada (sin cara detectada).', descriptor ? 'ok' : 'warn')
+  await cargarPersonal()
+  cerrarModalFoto()
+}
+
+// ════════════════════════════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════════════════════════════
+async function cargarDashboard() {
+  const personal  = allPersonal.filter(p => p.activo)
+  const { data: ficheros } = await sb.from('fichajes')
+    .select('*, perfiles(nombre, apellido, area, turno)')
+    .eq('fecha', hoy())
+    .order('hora', { ascending: true })
+
+  const conEntrada = new Set((ficheros ?? []).filter(f => f.tipo === 'entrada').map(f => f.personal_id))
+  const conSalida  = new Set((ficheros ?? []).filter(f => f.tipo === 'salida').map(f => f.personal_id))
+  const enJornada  = [...conEntrada].filter(id => !conSalida.has(id)).length
+
+  document.getElementById('st-total').textContent     = personal.length
+  document.getElementById('st-presentes').textContent = conEntrada.size
+  document.getElementById('st-jornada').textContent   = enJornada
+  document.getElementById('st-sinreg').textContent    = personal.length - conEntrada.size
+
+  // Armar tabla: una fila por empleado con su entrada y salida
+  const mapa = {}
+  ;(ficheros ?? []).forEach(f => {
+    if (!mapa[f.personal_id]) mapa[f.personal_id] = { perfil: f.perfiles, entrada: null, salida: null }
+    if (f.tipo === 'entrada') mapa[f.personal_id].entrada = f
+    if (f.tipo === 'salida')  mapa[f.personal_id].salida  = f
+  })
+
+  const filas = Object.values(mapa)
+  const nodata = document.getElementById('dash-nodata')
+  const tbody  = document.getElementById('dash-tabla')
+
+  if (!filas.length) { tbody.innerHTML = ''; nodata.style.display = 'block'; return }
+  nodata.style.display = 'none'
+
+  tbody.innerHTML = filas.map(({ perfil, entrada, salida }) => {
+    const hrs = diffHoras(entrada?.hora, salida?.hora)
+    return `<tr>
+      <td><strong>${perfil?.apellido}</strong>, ${perfil?.nombre}</td>
+      <td>${perfil?.area || '<span class="muted">—</span>'}</td>
+      <td>${perfil?.turno ? `<span class="tag tag-muted">${perfil.turno}</span>` : '<span class="muted">—</span>'}</td>
+      <td>${entrada ? `${fmtHora(entrada.hora)} <span class="tag-metodo">${entrada.verificado_facial ? '📷' : '✋'}</span>` : '<span class="muted">—</span>'}</td>
+      <td>${salida ? `${fmtHora(salida.hora)} <span class="tag-metodo">${salida.verificado_facial ? '📷' : '✋'}</span>` : (entrada ? '<span class="tag tag-warn">En jornada</span>' : '<span class="muted">—</span>')}</td>
+      <td>${hrs !== null ? `<strong>${hrs.toFixed(2)} h</strong>` : '<span class="muted">—</span>'}</td>
+    </tr>`
+  }).join('')
+}
+
+// ════════════════════════════════════════════════════════
+// ASISTENCIAS
+// ════════════════════════════════════════════════════════
+function poblarFiltrosAsist() {
+  const selEmp  = document.getElementById('asist-emp')
+  const selArea = document.getElementById('asist-area')
+  const areas   = [...new Set(allPersonal.map(p => p.area).filter(Boolean))].sort()
+
+  selEmp.innerHTML  = '<option value="">Todos</option>' + allPersonal.map(p => `<option value="${p.id}">${p.apellido}, ${p.nombre}</option>`).join('')
+  selArea.innerHTML = '<option value="">Todas</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('')
+}
+
+async function cargarAsistencias() {
+  const desde  = document.getElementById('asist-desde').value
+  const hasta  = document.getElementById('asist-hasta').value
+  const empId  = document.getElementById('asist-emp').value
+  const area   = document.getElementById('asist-area').value
+  const body   = document.getElementById('asist-body')
+
+  if (!desde || !hasta) return
+
+  body.innerHTML = '<div class="muted">Cargando...</div>'
+
+  let query = sb.from('fichajes')
+    .select('*, perfiles(nombre, apellido, area, turno, foto_url)')
+    .gte('fecha', desde)
+    .lte('fecha', hasta)
+    .order('fecha', { ascending: false })
+    .order('hora',  { ascending: true })
+
+  if (empId) query = query.eq('personal_id', empId)
+
+  const { data, error } = await query
+  if (error) { body.innerHTML = `<div class="err-msg">${error.message}</div>`; return }
+
+  let fichajes = data ?? []
+  if (area) fichajes = fichajes.filter(f => f.perfiles?.area === area)
+
+  if (!fichajes.length) { body.innerHTML = '<div class="no-data">Sin registros en el rango seleccionado.</div>'; return }
+
+  // Agrupar por fecha y luego por empleado para formar pares entrada-salida
+  const porFecha = {}
+  fichajes.forEach(f => {
+    if (!porFecha[f.fecha]) porFecha[f.fecha] = {}
+    if (!porFecha[f.fecha][f.personal_id]) porFecha[f.fecha][f.personal_id] = { perfil: f.perfiles, entrada: null, salida: null }
+    if (f.tipo === 'entrada') porFecha[f.fecha][f.personal_id].entrada = f
+    if (f.tipo === 'salida')  porFecha[f.fecha][f.personal_id].salida  = f
+  })
+
+  const fechas = Object.keys(porFecha).sort((a, b) => b.localeCompare(a))
+
+  body.innerHTML = fechas.map(fecha => {
+    const empleados = Object.values(porFecha[fecha])
+    const filas = empleados.map(({ perfil, entrada, salida }) => {
+      const hrs = diffHoras(entrada?.hora, salida?.hora)
+      return `<tr>
+        <td>
+          <div class="emp-name-cell">
+            ${perfil?.foto_url ? `<img src="${perfil.foto_url}" class="mini-foto" alt="">` : `<div class="mini-foto-placeholder">👤</div>`}
+            <div>
+              <div><strong>${perfil?.apellido}</strong>, ${perfil?.nombre}</div>
+              <div class="muted" style="font-size:12px">${perfil?.area || ''}${perfil?.turno ? ' · ' + perfil.turno : ''}</div>
+            </div>
+          </div>
+        </td>
+        <td>${entrada ? `${fmtHora(entrada.hora)} <span class="tag-metodo" title="${entrada.verificado_facial ? 'Facial' : 'Manual'}">${entrada.verificado_facial ? '📷' : '✋'}</span>` : '<span class="muted">—</span>'}</td>
+        <td>${salida ? `${fmtHora(salida.hora)} <span class="tag-metodo" title="${salida.verificado_facial ? 'Facial' : 'Manual'}">${salida.verificado_facial ? '📷' : '✋'}</span>` : (entrada ? '<span class="tag tag-warn">Sin salida</span>' : '<span class="muted">—</span>')}</td>
+        <td>${hrs !== null ? `<strong>${hrs.toFixed(2)} h</strong>` : '<span class="muted">—</span>'}</td>
+      </tr>`
+    }).join('')
+
+    return `
+      <div style="margin-bottom:20px; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;">
+        <div class="date-group-header">
+          <span>${fmtFecha(fecha)}</span>
+          <span class="muted" style="font-size:12px">${empleados.length} empleados</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Empleado</th><th>Entrada</th><th>Salida</th><th>Horas</th></tr></thead>
+            <tbody>${filas}</tbody>
+          </table>
+        </div>
+      </div>
+    `
+  }).join('')
+}
+
+// ════════════════════════════════════════════════════════
+// VALIDAR HORAS
+// ════════════════════════════════════════════════════════
+async function cargarValidacion() {
+  const fecha = document.getElementById('val-fecha').value
+  const body  = document.getElementById('val-body')
+  if (!fecha) return
+
+  body.innerHTML = '<div class="muted">Cargando...</div>'
+
+  // Traer fichajes del día
+  const { data: fichajes } = await sb.from('fichajes')
+    .select('*, perfiles(nombre, apellido, area, turno)')
+    .eq('fecha', fecha)
+    .order('hora', { ascending: true })
+
+  // Traer validaciones existentes del día
+  const { data: vals } = await sb.from('validaciones')
+    .select('*')
+    .eq('fecha', fecha)
+
+  const valMap = {}
+  ;(vals ?? []).forEach(v => { valMap[v.personal_id] = v })
+
+  // Agrupar fichajes por empleado
+  const empMap = {}
+  ;(fichajes ?? []).forEach(f => {
+    if (!empMap[f.personal_id]) empMap[f.personal_id] = { perfil: f.perfiles, entrada: null, salida: null }
+    if (f.tipo === 'entrada') empMap[f.personal_id].entrada = f
+    if (f.tipo === 'salida')  empMap[f.personal_id].salida  = f
+  })
+
+  const filas = Object.entries(empMap)
+  if (!filas.length) { body.innerHTML = '<div class="no-data">Sin fichajes en esta fecha.</div>'; return }
+
+  const rowsHtml = filas.map(([pid, { perfil, entrada, salida }]) => {
+    const hrs  = diffHoras(entrada?.hora, salida?.hora)
+    const val  = valMap[pid]
+    const isVal = val?.validado
+
+    return `
+      <tr class="${isVal ? 'val-row-validado' : ''}" id="vrow-${pid}">
+        <td>
+          <div class="val-nombre">${perfil?.apellido}, ${perfil?.nombre}</div>
+          <div class="val-meta">${perfil?.area || ''}${perfil?.turno ? ' · ' + perfil.turno : ''}</div>
+        </td>
+        <td>${entrada ? `${fmtHora(entrada.hora)} ${entrada.verificado_facial ? '📷' : '✋'}` : '<span class="muted">—</span>'}</td>
+        <td>${salida  ? `${fmtHora(salida.hora)} ${salida.verificado_facial ? '📷' : '✋'}`  : '<span class="tag tag-err">Sin salida</span>'}</td>
+        <td>${hrs !== null ? `<strong>${hrs.toFixed(2)} h</strong>` : '<span class="muted">—</span>'}</td>
+        <td>
+          <input type="number" class="horas-input" id="extra-${pid}"
+            value="${val?.horas_extra ?? 0}" min="0" max="12" step="0.25"
+            ${isVal ? 'disabled' : ''} title="Horas extra">
+        </td>
+        <td>
+          <textarea class="nota-input" id="nota-${pid}" rows="1"
+            placeholder="Observación..."
+            ${isVal ? 'disabled' : ''}>${val?.nota ?? ''}</textarea>
+        </td>
+        <td>
+          ${isVal
+            ? `<span class="tag tag-ok">✓ Validado</span>
+               <button onclick="desvalidar('${pid}','${fecha}')" class="btn-ghost btn-sm" style="margin-top:4px">Revertir</button>`
+            : `<button onclick="validar('${pid}','${fecha}',${hrs})" class="btn-ok btn-sm">Validar</button>`
+          }
+        </td>
+      </tr>
+    `
+  }).join('')
+
+  body.innerHTML = `
+    <div style="border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;">
+      <table class="val-table">
+        <thead><tr>
+          <th>Empleado</th><th>Entrada</th><th>Salida</th><th>Horas trab.</th><th>Hs. extra</th><th>Nota</th><th>Estado</th>
+        </tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+    </div>
+  `
+}
+
+async function validar(pid, fecha, horas) {
+  const horas_extra    = parseFloat(document.getElementById('extra-' + pid).value) || 0
+  const nota           = document.getElementById('nota-' + pid).value.trim() || null
+  const horas_trabajadas = horas ?? null
+
+  const { error } = await sb.from('validaciones').upsert({
+    personal_id: pid,
+    fecha,
+    horas_trabajadas,
+    horas_extra,
+    nota,
+    validado: true,
+    validado_por: adminPerfil.id,
+    validado_en:  new Date().toISOString()
+  }, { onConflict: 'personal_id,fecha' })
+
+  if (error) { showAlert('Error: ' + error.message, 'err'); return }
+  showAlert('Validado correctamente.', 'ok')
+  cargarValidacion()
+}
+
+async function desvalidar(pid, fecha) {
+  if (!confirm('¿Revertir la validación de este empleado?')) return
+  const { error } = await sb.from('validaciones').update({ validado: false, validado_por: null, validado_en: null }).eq('personal_id', pid).eq('fecha', fecha)
+  if (error) { showAlert('Error: ' + error.message, 'err'); return }
+  showAlert('Validación revertida.', 'warn')
+  cargarValidacion()
+}
+
+// ════════════════════════════════════════════════════════
+// SESIÓN
+// ════════════════════════════════════════════════════════
+async function cerrarSesion() {
+  await sb.auth.signOut()
+  location.href = 'login.html'
+}
+
+// ── Arrancar ──────────────────────────────────────────
+init()
+</script>
+</body>
+</html>
