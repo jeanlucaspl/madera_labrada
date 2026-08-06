@@ -1,4 +1,48 @@
 'use strict'
+
+// ── Ubicación del hotel ───────────────────────────────
+const HOTEL_LAT    = -6.4726691
+const HOTEL_LNG    = -76.3748982
+const RADIO_METROS = 150   // radio permitido en metros
+
+function _haversine(lat1, lng1, lat2, lng2) {
+  const R = 6371000
+  const dLat = (lat2 - lat1) * Math.PI / 180
+  const dLng = (lng2 - lng1) * Math.PI / 180
+  const a = Math.sin(dLat/2)**2 +
+            Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLng/2)**2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+}
+
+// Retorna { ok, distancia } o lanza error con mensaje legible
+function verificarUbicacion() {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject('Tu dispositivo no soporta geolocalización.')
+      return
+    }
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        const dist = Math.round(_haversine(pos.coords.latitude, pos.coords.longitude, HOTEL_LAT, HOTEL_LNG))
+        if (dist <= RADIO_METROS) {
+          resolve({ ok: true, distancia: dist })
+        } else {
+          reject(`Estás a ${dist} m del hotel. Debés estar dentro de los ${RADIO_METROS} m para registrar asistencia.`)
+        }
+      },
+      err => {
+        const msgs = {
+          1: 'Permiso de ubicación denegado. Habilitalo en la configuración del dispositivo.',
+          2: 'No se pudo obtener la ubicación. Verificá el GPS.',
+          3: 'La ubicación tardó demasiado. Intentá de nuevo.',
+        }
+        reject(msgs[err.code] || 'Error de geolocalización.')
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    )
+  })
+}
+
 const SUPABASE_URL      = 'https://pfwtrdfikkmknhrueeuj.supabase.co'
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmd3RyZGZpa2tta25ocnVlZXVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4MDU3NzksImV4cCI6MjA5NjM4MTc3OX0.jo00QI8lTGqamb2kelS4Kf5ts9sLI6eMAC8I6mRNrfg'
 

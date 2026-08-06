@@ -924,6 +924,14 @@ async function cargarMiHistorial() {
 }
 
 async function abrirMiCam() {
+  // Verificar ubicación antes de permitir fichar
+  try {
+    await verificarUbicacion()
+  } catch (msg) {
+    showAlert(msg, 'err')
+    return
+  }
+
   // Refrescar perfil por si la foto se subió después de iniciar sesión
   const { data: perfilFresco } = await sb.from('perfiles').select('foto_descriptor').eq('id', adminPerfil.id).single()
   if (perfilFresco?.foto_descriptor) adminPerfil.foto_descriptor = perfilFresco.foto_descriptor

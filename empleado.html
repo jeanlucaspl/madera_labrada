@@ -191,6 +191,14 @@
 
     // ── Abrir cámara / modal ─────────────────────────────
     async function abrirModalCam() {
+      // Verificar ubicación antes de permitir fichar
+      try {
+        await verificarUbicacion()
+      } catch (msg) {
+        showAlert(msg, 'err')
+        return
+      }
+
       // Sin descriptor: ofrecer solo manual
       if (!perfil.foto_descriptor) {
         if (!await customConfirm(`No tenés foto facial registrada. ¿Registrar ${tipoActual} manualmente?`, 'Registrar manual')) return
