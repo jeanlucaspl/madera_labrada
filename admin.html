@@ -924,6 +924,10 @@ async function cargarMiHistorial() {
 }
 
 async function abrirMiCam() {
+  // Refrescar perfil por si la foto se subió después de iniciar sesión
+  const { data: perfilFresco } = await sb.from('perfiles').select('foto_descriptor').eq('id', adminPerfil.id).single()
+  if (perfilFresco?.foto_descriptor) adminPerfil.foto_descriptor = perfilFresco.foto_descriptor
+
   if (!adminPerfil.foto_descriptor) {
     if (!await customConfirm(`No tenés foto facial registrada. ¿Registrar ${miTipoActual} manualmente?`, 'Registrar manual')) return
     await registrarMiFichaje(false); return
