@@ -51,3 +51,26 @@ function showAlert(msg, tipo = 'ok') {
   clearTimeout(_alertTimer)
   _alertTimer = setTimeout(() => { el.style.display = 'none' }, 4500)
 }
+
+function customConfirm(msg, btnOk = 'Confirmar', btnCancel = 'Cancelar') {
+  return new Promise(resolve => {
+    // Crear overlay
+    const overlay = document.createElement('div')
+    overlay.className = 'modal-overlay'
+    overlay.style.cssText = 'display:flex;z-index:9000;'
+
+    overlay.innerHTML = `
+      <div class="modal" style="max-width:320px;text-align:center;">
+        <p style="font-size:15px;color:var(--text);margin-bottom:24px;line-height:1.5;">${msg}</p>
+        <div style="display:flex;gap:10px;justify-content:center;">
+          <button id="cc-cancel" class="btn-ghost">${btnCancel}</button>
+          <button id="cc-ok" class="btn-primary">${btnOk}</button>
+        </div>
+      </div>
+    `
+    document.body.appendChild(overlay)
+
+    overlay.querySelector('#cc-ok').onclick = () => { overlay.remove(); resolve(true) }
+    overlay.querySelector('#cc-cancel').onclick = () => { overlay.remove(); resolve(false) }
+  })
+}

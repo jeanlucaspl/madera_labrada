@@ -59,7 +59,10 @@
 
       <div class="modal-footer-between">
         <button onclick="cancelarCam()" class="btn-ghost">Cancelar</button>
-        <button onclick="registrarManual()" class="btn-warn">Registrar sin cámara</button>
+        <button onclick="voltearCamara()" class="btn-ghost" id="btn-voltear-cam" style="padding:8px 12px;">
+          <i data-lucide="flip-horizontal-2" style="vertical-align:middle;"></i>
+        </button>
+        <button onclick="registrarManual()" class="btn-warn">Sin cámara</button>
       </div>
     </div>
   </div>
@@ -76,6 +79,7 @@
     let camStream   = null
     let stopVerif   = null
     let tipoActual  = null   // 'entrada' | 'salida'
+    let facingMode  = 'user'
 
     // ── Init ────────────────────────────────────────────
     async function init() {
@@ -189,7 +193,7 @@
     async function abrirModalCam() {
       // Sin descriptor: ofrecer solo manual
       if (!perfil.foto_descriptor) {
-        if (!confirm(`No tenés foto facial registrada.\n¿Registrar ${tipoActual} manualmente?`)) return
+        if (!await customConfirm(`No tenés foto facial registrada. ¿Registrar ${tipoActual} manualmente?`, 'Registrar manual')) return
         await registrarFichaje(false)
         return
       }
@@ -201,7 +205,7 @@
 
       try {
         camStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'user', width: { ideal: 640 } }
+          video: { facingMode, width: { ideal: 640 } }
         })
         const video  = document.getElementById('cam-video')
         const canvas = document.getElementById('cam-canvas')
@@ -233,6 +237,35 @@
       cerrarCam()
     }
 
+    async function voltearCamara() {
+      if (stopVerif) { stopVerif(); stopVerif = null }
+      if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null }
+      facingMode = facingMode === 'user' ? 'environment' : 'user'
+
+      const video  = document.getElementById('cam-video')
+      const canvas = document.getElementById('cam-canvas')
+      document.getElementById('cam-status').textContent = 'Cambiando cámara...'
+
+      try {
+        camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode, width: { ideal: 640 } } })
+        video.srcObject = camStream
+        await video.play()
+        stopVerif = await iniciarVerificacion({
+          video, canvas,
+          descriptor: perfil.foto_descriptor,
+          onStatus: msg => { document.getElementById('cam-status').textContent = msg },
+          onMatch: async pct => {
+            document.getElementById('cam-status').textContent = `Verificado (${pct}% coincidencia)`
+            await new Promise(r => setTimeout(r, 1200))
+            cerrarCam()
+            await registrarFichaje(true)
+          }
+        })
+      } catch {
+        document.getElementById('cam-status').textContent = 'No se pudo acceder a la cámara.'
+      }
+    }
+
     function cerrarCam() {
       if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null }
       const v = document.getElementById('cam-video')
@@ -241,7 +274,7 @@
     }
 
     async function registrarManual() {
-      if (!confirm(`¿Confirmar ${tipoActual} manualmente?`)) return
+      if (!await customConfirm(`¿Confirmar ${tipoActual} manualmente?`)) return
       cancelarCam()
       await registrarFichaje(false)
     }

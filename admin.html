@@ -154,7 +154,10 @@
     <div id="mi-cam-status" class="cam-status">Iniciando cámara...</div>
     <div class="modal-footer-between">
       <button onclick="cancelarMiCam()" class="btn-ghost">Cancelar</button>
-      <button onclick="registrarMiManual()" class="btn-warn">Registrar sin cámara</button>
+      <button onclick="voltearMiCamara()" class="btn-ghost" style="padding:8px 12px;">
+        <i data-lucide="flip-horizontal-2" style="vertical-align:middle;"></i>
+      </button>
+      <button onclick="registrarMiManual()" class="btn-warn">Sin cámara</button>
     </div>
   </div>
 </div>
@@ -467,7 +470,7 @@ async function toggleActivo(id, estadoActual) {
 }
 
 async function eliminarEmpleado(id, nombre) {
-  if (!confirm(`¿Eliminar a "${nombre}"?\nEsta acción no se puede deshacer y eliminará todos sus fichajes.`)) return
+  if (!await customConfirm(`¿Eliminar a "${nombre}"? Esta acción no se puede deshacer.`, 'Eliminar', 'Cancelar')) return
   const { error } = await sb.from('perfiles').delete().eq('id', id)
   if (error) { showAlert('Error al eliminar: ' + error.message, 'err'); return }
   showAlert('Empleado eliminado.', 'ok')
@@ -824,7 +827,7 @@ async function validar(pid, fecha, horas) {
 }
 
 async function desvalidar(pid, fecha) {
-  if (!confirm('¿Revertir la validación de este empleado?')) return
+  if (!await customConfirm('¿Revertir la validación de este empleado?', 'Revertir')) return
   const { error } = await sb.from('validaciones').update({ validado: false, validado_por: null, validado_en: null }).eq('personal_id', pid).eq('fecha', fecha)
   if (error) { showAlert('Error: ' + error.message, 'err'); return }
   showAlert('Validación revertida.', 'warn')
@@ -838,6 +841,7 @@ let miFichajesHoy = []
 let miCamStream   = null
 let miStopVerif   = null
 let miTipoActual  = null
+let miFacingMode  = 'user'
 
 async function cargarMiAsistencia() {
   const { data } = await sb.from('fichajes')
@@ -907,14 +911,14 @@ async function cargarMiHistorial() {
 
 async function abrirMiCam() {
   if (!adminPerfil.foto_descriptor) {
-    if (!confirm(`No tenés foto facial registrada.\n¿Registrar ${miTipoActual} manualmente?`)) return
+    if (!await customConfirm(`No tenés foto facial registrada. ¿Registrar ${miTipoActual} manualmente?`, 'Registrar manual')) return
     await registrarMiFichaje(false); return
   }
   document.getElementById('modal-mi-cam').style.display = 'flex'
   document.getElementById('modal-mi-cam-titulo').textContent = miTipoActual === 'entrada' ? 'Verificar Entrada' : 'Verificar Salida'
   document.getElementById('mi-cam-status').textContent = 'Iniciando cámara...'
   try {
-    miCamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 } } })
+    miCamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: miFacingMode, width: { ideal: 640 } } })
     const video  = document.getElementById('mi-cam-video')
     const canvas = document.getElementById('mi-cam-canvas')
     video.srcObject = miCamStream
@@ -938,6 +942,35 @@ async function abrirMiCam() {
 
 function cancelarMiCam() { if (miStopVerif) { miStopVerif(); miStopVerif = null } cerrarMiCam() }
 
+async function voltearMiCamara() {
+  if (miStopVerif) { miStopVerif(); miStopVerif = null }
+  if (miCamStream) { miCamStream.getTracks().forEach(t => t.stop()); miCamStream = null }
+  miFacingMode = miFacingMode === 'user' ? 'environment' : 'user'
+
+  const video  = document.getElementById('mi-cam-video')
+  const canvas = document.getElementById('mi-cam-canvas')
+  document.getElementById('mi-cam-status').textContent = 'Cambiando cámara...'
+
+  try {
+    miCamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: miFacingMode, width: { ideal: 640 } } })
+    video.srcObject = miCamStream
+    await video.play()
+    miStopVerif = await iniciarVerificacion({
+      video, canvas,
+      descriptor: adminPerfil.foto_descriptor,
+      onStatus: msg => { document.getElementById('mi-cam-status').textContent = msg },
+      onMatch: async pct => {
+        document.getElementById('mi-cam-status').textContent = `Verificado (${pct}% coincidencia)`
+        await new Promise(r => setTimeout(r, 1200))
+        cerrarMiCam()
+        await registrarMiFichaje(true)
+      }
+    })
+  } catch {
+    document.getElementById('mi-cam-status').textContent = 'No se pudo acceder a la cámara.'
+  }
+}
+
 function cerrarMiCam() {
   if (miCamStream) { miCamStream.getTracks().forEach(t => t.stop()); miCamStream = null }
   const v = document.getElementById('mi-cam-video'); if (v) v.srcObject = null
@@ -945,7 +978,7 @@ function cerrarMiCam() {
 }
 
 async function registrarMiManual() {
-  if (!confirm(`¿Confirmar ${miTipoActual} manualmente?`)) return
+  if (!await customConfirm(`¿Confirmar ${miTipoActual} manualmente?`)) return
   cancelarMiCam()
   await registrarMiFichaje(false)
 }
