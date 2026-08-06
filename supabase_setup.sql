@@ -3,16 +3,6 @@
 -- Ejecutar en: Supabase Dashboard → SQL Editor
 -- ============================================================
 
--- Helper: verifica si el usuario autenticado es admin activo
--- SECURITY DEFINER para que bypasse RLS al consultar perfiles
-CREATE OR REPLACE FUNCTION es_admin()
-  RETURNS BOOLEAN LANGUAGE sql STABLE SECURITY DEFINER AS $$
-    SELECT EXISTS (
-      SELECT 1 FROM perfiles
-      WHERE id = auth.uid() AND rol = 'admin' AND activo = true
-    )
-  $$;
-
 -- ── TABLA: perfiles ──────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS perfiles (
   id              UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
@@ -27,6 +17,18 @@ CREATE TABLE IF NOT EXISTS perfiles (
   activo          BOOLEAN NOT NULL DEFAULT true,
   created_at      TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Helper: ahora sí existe perfiles, se puede crear la función
+-- PL/pgSQL para que valide en tiempo de ejecución, no de compilación
+CREATE OR REPLACE FUNCTION es_admin()
+  RETURNS BOOLEAN LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
+  BEGIN
+    RETURN EXISTS (
+      SELECT 1 FROM perfiles
+      WHERE id = auth.uid() AND rol = 'admin' AND activo = true
+    );
+  END;
+  $$;
 
 ALTER TABLE perfiles ENABLE ROW LEVEL SECURITY;
 
