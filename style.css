@@ -322,61 +322,64 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .foto-wrap img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent); }
 .foto-placeholder { width: 120px; height: 120px; border-radius: 50%; background: var(--card); border: 2px dashed var(--border); display: inline-flex; align-items: center; justify-content: center; color: var(--muted); font-size: 40px; }
 
-/* ── App layout (admin) ────────────────────────────── */
-.app-layout {
-  display: flex;
-  min-height: 100vh;
-}
-
-/* Sidebar desktop */
-.sidebar {
-  width: 210px;
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
+/* ── Admin header ──────────────────────────────────── */
+.admin-header {
   position: sticky;
   top: 0;
-  height: 100vh;
-  overflow-y: auto;
-}
-.sidebar-brand {
-  padding: 20px 18px 16px;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--accent);
+  z-index: 50;
+  background: var(--surface);
   border-bottom: 1px solid var(--border);
-  letter-spacing: .3px;
-}
-.nav-item {
+  padding: 10px 16px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
-  padding: 13px 18px;
+}
+.admin-header-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent);
+  flex: 1;
+  text-align: center;
+}
+
+/* ── Bottom nav ────────────────────────────────────── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  z-index: 100;
+  height: 60px;
+}
+.bnav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
   background: transparent;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 10px;
   font-weight: 500;
-  text-align: left;
-  width: 100%;
+  padding: 6px 2px;
   border-radius: 0;
   transition: color .15s, background .15s;
+  min-width: 0;
 }
-.nav-item:hover, .nav-item.active {
-  background: var(--card);
+.bnav-item:hover, .bnav-item.active {
   color: var(--accent);
+  background: var(--card);
 }
-.nav-icon { font-size: 16px; width: 20px; text-align: center; }
-.nav-logout { margin-top: auto; border-top: 1px solid var(--border); color: var(--err); }
-.nav-logout:hover { color: var(--err); background: var(--err-bg); }
+.bnav-icon { font-size: 20px; line-height: 1; }
 
-/* Main content */
+/* ── Main content ──────────────────────────────────── */
 .main-content {
-  flex: 1;
+  padding: 16px 14px 76px;
+  max-width: 100%;
   overflow-x: hidden;
-  padding: 24px 20px;
-  max-width: calc(100vw - 210px);
 }
 
 /* Secciones */
@@ -521,69 +524,20 @@ tr:hover td { background: rgba(255,255,255,.025); }
 .val-row:last-child { border-bottom: none; }
 
 /* ── Mobile ────────────────────────────────────────── */
-@media (max-width: 900px) {
-
-  /* ── Sidebar → bottom nav bar ── */
-  .sidebar {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    width: 100%; height: auto;
-    flex-direction: row;
-    justify-content: space-around;
-    border-right: none;
-    border-top: 1px solid var(--border);
-    z-index: 100;
-    overflow-x: auto;
-    overflow-y: hidden;
-  }
-  .sidebar-brand { display: none; }
-  .nav-item {
-    flex-direction: column;
-    gap: 2px;
-    padding: 8px 4px;
-    font-size: 10px;
-    min-width: 48px;
-    flex: 1;
-    text-align: center;
-    justify-content: center;
-  }
-  .nav-icon { font-size: 20px; width: auto; }
-  .nav-logout { margin-top: 0; border-top: none; border-left: 1px solid var(--border); }
-
-  /* ── Main content ── */
-  .app-layout { display: block; }
-  .main-content {
-    padding: 14px 12px 88px;
-    max-width: 100vw;
-    width: 100%;
-  }
-
-  /* ── Auth ── */
+@media (max-width: 600px) {
   .auth-card { padding: 28px 18px; }
-
-  /* ── Section title ── */
-  .section-title { font-size: 17px; margin-bottom: 14px; }
-
-  /* ── Stats grid: 2 cols ── */
   .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .stat-num { font-size: 26px; }
-
-  /* ── Topbar: stack vertical ── */
+  .section-title { font-size: 16px; margin-bottom: 12px; }
   .section-topbar { flex-direction: column; align-items: stretch; }
   .search-input { width: 100%; }
-
-  /* ── Filtros: stack ── */
   .filtros { flex-direction: column; gap: 8px; }
   .filtros .field { min-width: 0; width: 100%; }
-
-  /* ── Tablas: scroll horizontal + texto compacto ── */
   .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  table { font-size: 13px; min-width: 480px; }
-  th, td { padding: 8px 8px; }
+  table { font-size: 13px; }
+  th, td { padding: 8px 6px; }
   .actions { gap: 4px; }
   .btn-sm { padding: 6px 8px; font-size: 12px; }
-
-  /* ── Modal: casi full screen ── */
   .modal-overlay { padding: 0; align-items: flex-end; }
   .modal {
     max-width: 100%;
@@ -592,20 +546,8 @@ tr:hover td { background: rgba(255,255,255,.025); }
     max-height: 92vh;
     padding: 20px 16px;
   }
-
-  /* ── Cámara: más alta en mobile ── */
-  .cam-wrap { aspect-ratio: 3/4; }
-
-  /* ── Cards ── */
   .card { padding: 14px 12px; }
-
-  /* ── Botones táctiles: mínimo 44px ── */
   .btn-primary, .btn-ghost, .btn-warn, .btn-ok { min-height: 44px; }
   .btn-marcar { padding: 20px; font-size: 17px; }
-
-  /* ── Empleado portal ── */
-  .emp-main { padding: 14px 12px 88px; }
-
-  /* ── Mi asistencia en admin: misma adaptación que empleado ── */
-  #sec-mi-asistencia .btn-wrap { margin-bottom: 12px; }
+  .emp-main { padding: 14px 12px 76px; }
 }
