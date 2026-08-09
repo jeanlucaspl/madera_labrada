@@ -1,6 +1,7 @@
 -- ============================================================
 -- MADERA LABRADA — Base de datos Supabase
 -- Ejecutar en: Supabase Dashboard → SQL Editor
+-- Idempotente: se puede correr múltiples veces sin error
 -- ============================================================
 
 -- ── TABLA: perfiles ──────────────────────────────────────────
@@ -9,28 +10,41 @@ CREATE TABLE IF NOT EXISTS perfiles (
   nombre          TEXT NOT NULL,
   apellido        TEXT NOT NULL,
   dni             TEXT,
-  rol             TEXT NOT NULL DEFAULT 'empleado' CHECK (rol IN ('admin','empleado')),
+  rol             TEXT NOT NULL DEFAULT 'empleado' CHECK (rol IN ('superadmin','admin','empleado')),
   turno           TEXT CHECK (turno IN ('mañana','tarde','noche')),
-  area            TEXT,
+  area            TEXT CHECK (area IN ('Cocina','Limpieza','Recepción','Inventario','RRHH') OR area IS NULL),
   foto_url        TEXT,
   foto_descriptor JSONB,
   activo          BOOLEAN NOT NULL DEFAULT true,
   created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Helper: ahora sí existe perfiles, se puede crear la función
--- PL/pgSQL para que valide en tiempo de ejecución, no de compilación
 CREATE OR REPLACE FUNCTION es_admin()
   RETURNS BOOLEAN LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
   BEGIN
     RETURN EXISTS (
       SELECT 1 FROM perfiles
-      WHERE id = auth.uid() AND rol = 'admin' AND activo = true
+      WHERE id = auth.uid() AND rol IN ('superadmin','admin') AND activo = true
     );
   END;
-  $$;
+$$;
+
+CREATE OR REPLACE FUNCTION es_superadmin()
+  RETURNS BOOLEAN LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
+  BEGIN
+    RETURN EXISTS (
+      SELECT 1 FROM perfiles
+      WHERE id = auth.uid() AND rol = 'superadmin' AND activo = true
+    );
+  END;
+$$;
 
 ALTER TABLE perfiles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "perfiles_read"   ON perfiles;
+DROP POLICY IF EXISTS "perfiles_insert" ON perfiles;
+DROP POLICY IF EXISTS "perfiles_update" ON perfiles;
+DROP POLICY IF EXISTS "perfiles_delete" ON perfiles;
 
 CREATE POLICY "perfiles_read" ON perfiles FOR SELECT TO authenticated
   USING (id = auth.uid() OR es_admin());
@@ -42,7 +56,7 @@ CREATE POLICY "perfiles_update" ON perfiles FOR UPDATE TO authenticated
   USING (id = auth.uid() OR es_admin());
 
 CREATE POLICY "perfiles_delete" ON perfiles FOR DELETE TO authenticated
-  USING (es_admin());
+  USING (es_superadmin());
 
 -- ── TABLA: fichajes ──────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS fichajes (
@@ -57,6 +71,11 @@ CREATE TABLE IF NOT EXISTS fichajes (
 
 ALTER TABLE fichajes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "fichajes_read"   ON fichajes;
+DROP POLICY IF EXISTS "fichajes_insert" ON fichajes;
+DROP POLICY IF EXISTS "fichajes_update" ON fichajes;
+DROP POLICY IF EXISTS "fichajes_delete" ON fichajes;
+
 CREATE POLICY "fichajes_read" ON fichajes FOR SELECT TO authenticated
   USING (personal_id = auth.uid() OR es_admin());
 
@@ -67,7 +86,7 @@ CREATE POLICY "fichajes_update" ON fichajes FOR UPDATE TO authenticated
   USING (es_admin());
 
 CREATE POLICY "fichajes_delete" ON fichajes FOR DELETE TO authenticated
-  USING (es_admin());
+  USING (es_superadmin());
 
 -- ── TABLA: validaciones ──────────────────────────────────────
 CREATE TABLE IF NOT EXISTS validaciones (
@@ -86,11 +105,16 @@ CREATE TABLE IF NOT EXISTS validaciones (
 
 ALTER TABLE validaciones ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "validaciones_admin" ON validaciones FOR ALL TO authenticated
-  USING (es_admin()) WITH CHECK (es_admin());
+DROP POLICY IF EXISTS "validaciones_admin"       ON validaciones;
+DROP POLICY IF EXISTS "validaciones_read_propio" ON validaciones;
+DROP POLICY IF EXISTS "validaciones_read"        ON validaciones;
+DROP POLICY IF EXISTS "validaciones_write"       ON validaciones;
 
-CREATE POLICY "validaciones_read_propio" ON validaciones FOR SELECT TO authenticated
+CREATE POLICY "validaciones_read" ON validaciones FOR SELECT TO authenticated
   USING (personal_id = auth.uid() OR es_admin());
+
+CREATE POLICY "validaciones_write" ON validaciones FOR ALL TO authenticated
+  USING (es_admin()) WITH CHECK (es_admin());
 
 -- ============================================================
 -- CONFIGURACIÓN MANUAL REQUERIDA EN SUPABASE DASHBOARD
@@ -98,12 +122,12 @@ CREATE POLICY "validaciones_read_propio" ON validaciones FOR SELECT TO authentic
 -- 1. Storage → New bucket → nombre: "fotos-personal" → Public: ON
 --
 -- 2. Authentication → Email → "Enable email confirmations" → OFF
---    (necesario para que el admin pueda crear usuarios sin confirmación)
 --
--- 3. Crear el primer admin:
---    a) Authentication → Users → Add user → ingresá email + password
---    b) Copiar el UUID del usuario creado
---    c) Ejecutar en SQL Editor:
---       INSERT INTO perfiles (id, nombre, apellido, rol)
---       VALUES ('<UUID>', 'Tu Nombre', 'Tu Apellido', 'admin');
+-- 3. Asignar superadmin (reemplazar con tu UUID real):
+--    UPDATE perfiles SET rol = 'superadmin', area = NULL
+--    WHERE id = '<TU_UUID>';
+--
+-- 4. Crear admins por área:
+--    UPDATE perfiles SET rol = 'admin', area = 'RRHH'
+--    WHERE id = '<UUID_DEL_ADMIN>';
 -- ============================================================

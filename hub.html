@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Madera Labrada — Hub</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    /* ── Hub específico ── */
+    .hub-main { padding: 16px 14px 80px; max-width: 700px; margin: 0 auto; }
+
+    /* Header notif badge */
+    .notif-btn { position: relative; background: transparent; border: none; color: var(--muted); padding: 6px; }
+    .notif-btn:hover { color: var(--accent); }
+    .notif-badge {
+      position: absolute; top: 0; right: 0;
+      background: var(--err); color: #fff;
+      font-size: 10px; font-weight: 700;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      display: none;
+    }
+
+    /* Saludo */
+    .hub-saludo { margin-bottom: 20px; }
+    .hub-saludo h2 { font-size: 20px; font-weight: 700; color: var(--text); }
+    .hub-saludo p  { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+    /* Stats */
+    .hub-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .hub-stat {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .hub-stat-icon {
+      width: 42px; height: 42px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .hub-stat-icon.gold    { background: var(--warn-bg); color: var(--accent); }
+    .hub-stat-icon.green   { background: var(--ok-bg);   color: var(--ok); }
+    .hub-stat-icon.red     { background: var(--err-bg);  color: var(--err); }
+    .hub-stat-icon.muted   { background: rgba(255,255,255,.05); color: var(--muted); }
+    .hub-stat-num   { font-size: 26px; font-weight: 700; color: var(--text); line-height: 1; }
+    .hub-stat-label { font-size: 11px; color: var(--muted); margin-top: 3px; text-transform: uppercase; letter-spacing: .4px; }
+
+    /* Módulos */
+    .hub-section-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .6px; color: var(--muted); margin-bottom: 12px;
+    }
+    .hub-modules {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .hub-module {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 16px;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: border-color .15s, background .15s;
+      cursor: pointer;
+    }
+    .hub-module:hover { border-color: var(--accent); background: rgba(200,164,90,.07); }
+    .hub-module-icon {
+      width: 44px; height: 44px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+    .hub-module-name  { font-size: 15px; font-weight: 700; color: var(--text); }
+    .hub-module-desc  { font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .hub-module-arrow { color: var(--accent); margin-top: auto; }
+
+    /* Módulos por color */
+    .mod-rrhh       .hub-module-icon { background: rgba(90,158,111,.15); color: var(--ok); }
+    .mod-cocina     .hub-module-icon { background: rgba(200,164,90,.15); color: var(--accent); }
+    .mod-recepcion  .hub-module-icon { background: rgba(100,140,200,.15); color: #7aaad8; }
+    .mod-limpieza   .hub-module-icon { background: rgba(160,120,200,.15); color: #b07ad8; }
+    .mod-inventario .hub-module-icon { background: rgba(200,90,90,.15);   color: #d87a7a; }
+    .mod-reportes   .hub-module-icon { background: rgba(90,160,160,.15);  color: #7ad8d8; }
+
+    /* Notificaciones */
+    .notif-list { display: flex; flex-direction: column; gap: 10px; }
+    .notif-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .notif-item.no-leida { border-left: 3px solid var(--accent); }
+    .notif-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+    .notif-dot.stock_bajo        { background: var(--err); }
+    .notif-dot.habitacion_lista  { background: var(--ok); }
+    .notif-dot.limpieza_pendiente { background: #b07ad8; }
+    .notif-dot.egreso_alto       { background: var(--accent); }
+    .notif-dot.manual            { background: var(--muted); }
+    .notif-titulo  { font-size: 13px; font-weight: 600; color: var(--text); }
+    .notif-mensaje { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .notif-hora    { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .notif-empty   { text-align: center; padding: 24px; color: var(--muted); font-size: 13px; }
+
+    /* Habitaciones quick view */
+    .hab-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 8px;
+    }
+    .hab-chip {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 8px;
+      text-align: center;
+      font-size: 12px;
+    }
+    .hab-chip-nombre { font-weight: 700; color: var(--text); font-size: 13px; }
+    .hab-chip-tipo   { font-size: 10px; color: var(--muted); margin: 2px 0; }
+    .hab-chip-estado { font-size: 11px; font-weight: 600; margin-top: 4px; }
+    .hab-chip.Disponible  { border-color: var(--ok); }
+    .hab-chip.Ocupado     { border-color: var(--err); }
+    .hab-chip.Limpieza    { border-color: #b07ad8; }
+    .hab-chip.Mantenimiento { border-color: var(--muted); }
+    .hab-chip.Disponible   .hab-chip-estado { color: var(--ok); }
+    .hab-chip.Ocupado      .hab-chip-estado { color: var(--err); }
+    .hab-chip.Limpieza     .hab-chip-estado { color: #b07ad8; }
+    .hab-chip.Mantenimiento .hab-chip-estado { color: var(--muted); }
+
+    /* Secciones */
+    .hub-section { display: none; }
+    .hub-section.active { display: block; }
+
+    @media (max-width: 480px) {
+      .hub-modules { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .hub-module  { padding: 14px 12px; }
+      .hub-stat    { padding: 12px; gap: 10px; }
+      .hub-stat-icon { width: 36px; height: 36px; }
+      .hub-stat-num  { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+<div id="global-alert" class="global-alert" style="display:none"></div>
+
+<!-- ── Header ── -->
+<header class="admin-header">
+  <img src="madera_labrada_logo-removebg-preview.png" alt="Madera Labrada" style="height:26px;">
+  <span class="admin-header-title" id="hub-title">Hub</span>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <button class="notif-btn" onclick="showSection('notificaciones')" title="Notificaciones">
+      <i data-lucide="bell" style="width:22px;height:22px;"></i>
+      <span class="notif-badge" id="notif-badge"></span>
+    </button>
+    <button class="btn-ghost-sm" onclick="cerrarSesion()">Salir</button>
+  </div>
+</header>
+
+<!-- ── Contenido ── -->
+<main class="hub-main">
+
+  <!-- ════ DASHBOARD ════ -->
+  <div class="hub-section active" id="sec-dashboard">
+
+    <div class="hub-saludo">
+      <h2>Buen día, <span id="saludo-nombre">—</span></h2>
+      <p id="saludo-fecha">—</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="hub-stats">
+      <div class="hub-stat">
+        <div class="hub-stat-icon green"><i data-lucide="users" style="width:20px;height:20px;"></i></div>
+        <div>
+          <div class="hub-stat-num" id="st-presentes">—</div>
+          <div class="hub-stat-label">Presentes hoy</div>
+        </div>
+      </div>
+      <div class="hub-stat">
+        <div class="hub-stat-icon red"><i data-lucide="bed-double" style="width:20px;height:20px;"></i></div>
+        <div>
+          <div class="hub-stat-num" id="st-ocupadas">—</div>
+          <div class="hub-stat-label">Habitaciones ocupadas</div>
+        </div>
+      </div>
+      <div class="hub-stat">
+        <div class="hub-stat-icon gold"><i data-lucide="banknote" style="width:20px;height:20px;"></i></div>
+        <div>
+          <div class="hub-stat-num" id="st-caja">—</div>
+          <div class="hub-stat-label">Ingresos hoy</div>
+        </div>
+      </div>
+      <div class="hub-stat">
+        <div class="hub-stat-icon red"><i data-lucide="package-x" style="width:20px;height:20px;"></i></div>
+        <div>
+          <div class="hub-stat-num" id="st-alertas">—</div>
+          <div class="hub-stat-label">Alertas stock</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Módulos -->
+    <p class="hub-section-title">Paneles de gestión</p>
+    <div class="hub-modules">
+
+      <div class="hub-module mod-rrhh" onclick="location.href='panel_rrhh.html'">
+        <div class="hub-module-icon"><i data-lucide="users-round" style="width:22px;height:22px;"></i></div>
+        <div>
+          <div class="hub-module-name">RRHH</div>
+          <div class="hub-module-desc">Personal, asistencias y validación de horas</div>
+        </div>
+        <div class="hub-module-arrow"><i data-lucide="chevron-right" style="width:16px;height:16px;"></i></div>
+      </div>
+
+      <div class="hub-module mod-cocina" onclick="location.href='panel_cocina.html'">
+        <div class="hub-module-icon"><i data-lucide="utensils" style="width:22px;height:22px;"></i></div>
+        <div>
+          <div class="hub-module-name">Cocina</div>
+          <div class="hub-module-desc">Inventario, pedidos y caja restaurant</div>
+        </div>
+        <div class="hub-module-arrow"><i data-lucide="chevron-right" style="width:16px;height:16px;"></i></div>
+      </div>
+
+      <div class="hub-module mod-recepcion" onclick="location.href='panel_recepcion.html'">
+        <div class="hub-module-icon"><i data-lucide="concierge-bell" style="width:22px;height:22px;"></i></div>
+        <div>
+          <div class="hub-module-name">Recepción</div>
+          <div class="hub-module-desc">Habitaciones, check-in/out y caja</div>
+        </div>
+        <div class="hub-module-arrow"><i data-lucide="chevron-right" style="width:16px;height:16px;"></i></div>
+      </div>
+
+      <div class="hub-module mod-limpieza" onclick="location.href='panel_limpieza.html'">
+        <div class="hub-module-icon"><i data-lucide="sparkles" style="width:22px;height:22px;"></i></div>
+        <div>
+          <div class="hub-module-name">Limpieza</div>
+          <div class="hub-module-desc">Estado de habitaciones e insumos</div>
+        </div>
+        <div class="hub-module-arrow"><i data-lucide="chevron-right" style="width:16px;height:16px;"></i></div>
+      </div>
+
+      <div class="hub-module mod-inventario" onclick="location.href='panel_inventario.html'">
+        <div class="hub-module-icon"><i data-lucide="package" style="width:22px;height:22px;"></i></div>
+        <div>
+          <div class="hub-module-name">Inventario</div>
+          <div class="hub-module-desc">Stock general y movimientos</div>
+        </div>
+        <div class="hub-module-arrow"><i data-lucide="chevron-right" style="width:16px;height:16px;"></i></div>
+      </div>
+
+      <div class="hub-module mod-reportes" onclick="location.href='panel_reportes.html'">
+        <div class="hub-module-icon"><i data-lucide="bar-chart-3" style="width:22px;height:22px;"></i></div>
+        <div>
+          <div class="hub-module-name">Reportes</div>
+          <div class="hub-module-desc">Ingresos, egresos y ocupación</div>
+        </div>
+        <div class="hub-module-arrow"><i data-lucide="chevron-right" style="width:16px;height:16px;"></i></div>
+      </div>
+
+    </div>
+
+    <!-- Notificaciones recientes -->
+    <p class="hub-section-title">Notificaciones recientes</p>
+    <div id="notif-preview"></div>
+
+  </div>
+
+  <!-- ════ HABITACIONES ════ -->
+  <div class="hub-section" id="sec-habitaciones">
+    <div class="section-title">Habitaciones</div>
+
+    <!-- Leyenda -->
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;font-size:12px;">
+      <span><span style="color:var(--ok);">■</span> Disponible</span>
+      <span><span style="color:var(--err);">■</span> Ocupado</span>
+      <span><span style="color:#b07ad8;">■</span> Limpieza</span>
+      <span><span style="color:var(--muted);">■</span> Mantenimiento</span>
+    </div>
+
+    <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;" id="hab-filtros">
+      <button class="btn-ghost btn-sm hab-filtro active" data-filtro="">Todas</button>
+      <button class="btn-ghost btn-sm hab-filtro" data-filtro="Disponible">Disponible</button>
+      <button class="btn-ghost btn-sm hab-filtro" data-filtro="Ocupado">Ocupado</button>
+      <button class="btn-ghost btn-sm hab-filtro" data-filtro="Limpieza">Limpieza</button>
+      <button class="btn-ghost btn-sm hab-filtro" data-filtro="Mantenimiento">Mantenimiento</button>
+    </div>
+
+    <div class="hab-grid" id="hab-grid">
+      <div class="muted">Cargando...</div>
+    </div>
+  </div>
+
+  <!-- ════ NOTIFICACIONES ════ -->
+  <div class="hub-section" id="sec-notificaciones">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div class="section-title" style="margin-bottom:0;">Notificaciones</div>
+      <button class="btn-ghost-sm" onclick="marcarTodasLeidas()">Marcar leídas</button>
+    </div>
+    <div id="notif-lista"><div class="muted" style="text-align:center;padding:24px;">Cargando...</div></div>
+  </div>
+
+</main>
+
+<!-- ── Bottom Nav ── -->
+<nav class="bottom-nav">
+  <button class="bnav-item active" id="nav-dashboard"       onclick="showSection('dashboard')">
+    <span class="bnav-icon"><i data-lucide="layout-dashboard"></i></span><span>Inicio</span>
+  </button>
+  <button class="bnav-item"        id="nav-habitaciones"    onclick="showSection('habitaciones')">
+    <span class="bnav-icon"><i data-lucide="bed-double"></i></span><span>Habitaciones</span>
+  </button>
+  <button class="bnav-item"        id="nav-notificaciones"  onclick="showSection('notificaciones')">
+    <span class="bnav-icon" style="position:relative;">
+      <i data-lucide="bell"></i>
+      <span id="bnav-notif-badge" style="position:absolute;top:-4px;right:-6px;background:var(--err);color:#fff;font-size:9px;font-weight:700;width:14px;height:14px;border-radius:50%;display:none;align-items:center;justify-content:center;"></span>
+    </span>
+    <span>Alertas</span>
+  </button>
+</nav>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="shared.js"></script>
+<script>
+'use strict'
+
+let habitacionesData = []
+let filtroActual = ''
+
+// ── Inicialización ──────────────────────────────────────────
+async function init() {
+  const perfil = await requireAuth(['superadmin'])
+  if (!perfil) return
+
+  // Saludo
+  document.getElementById('saludo-nombre').textContent = perfil.nombre
+  document.getElementById('saludo-fecha').textContent =
+    new Date().toLocaleDateString('es-PE', { weekday:'long', day:'numeric', month:'long' })
+
+  lucide.createIcons()
+
+  await Promise.all([
+    cargarStats(),
+    cargarNotifPreview(),
+    cargarHabitaciones(),
+  ])
+
+  suscribirRealtime()
+}
+
+// ── Stats ───────────────────────────────────────────────────
+async function cargarStats() {
+  const hoyStr = new Date().toISOString().slice(0, 10)
+
+  const [
+    { data: fichajes },
+    { data: habitaciones },
+    { data: caja },
+    { data: alertas },
+  ] = await Promise.all([
+    sb.from('fichajes').select('personal_id').eq('fecha', hoyStr).eq('tipo', 'entrada'),
+    sb.from('habitaciones').select('estado').eq('activo', true),
+    sb.from('caja_movimientos').select('monto').eq('tipo', 'ingreso').eq('anulado', false)
+      .gte('created_at', hoyStr + 'T00:00:00'),
+    sb.from('stock_alertas').select('id').in('alerta', ['stock_bajo','sin_stock']),
+  ])
+
+  const presentes  = new Set((fichajes || []).map(f => f.personal_id)).size
+  const ocupadas   = (habitaciones || []).filter(h => h.estado === 'Ocupado').length
+  const ingresos   = (caja || []).reduce((s, m) => s + parseFloat(m.monto), 0)
+  const nAlertas   = (alertas || []).length
+
+  document.getElementById('st-presentes').textContent = presentes
+  document.getElementById('st-ocupadas').textContent  = ocupadas
+  document.getElementById('st-caja').textContent      = 'S/' + ingresos.toFixed(0)
+  document.getElementById('st-alertas').textContent   = nAlertas
+}
+
+// ── Habitaciones ────────────────────────────────────────────
+async function cargarHabitaciones() {
+  const { data } = await sb.from('habitaciones')
+    .select('id, nombre, tipo, bloque, estado')
+    .eq('activo', true)
+    .order('bloque').order('nombre')
+
+  habitacionesData = data || []
+  renderHabitaciones()
+}
+
+function renderHabitaciones() {
+  const grid = document.getElementById('hab-grid')
+  const lista = filtroActual
+    ? habitacionesData.filter(h => h.estado === filtroActual)
+    : habitacionesData
+
+  if (!lista.length) {
+    grid.innerHTML = '<div class="muted">Sin habitaciones.</div>'
+    return
+  }
+
+  // Agrupar por bloque
+  const bloques = {}
+  lista.forEach(h => {
+    if (!bloques[h.bloque]) bloques[h.bloque] = []
+    bloques[h.bloque].push(h)
+  })
+
+  grid.innerHTML = Object.entries(bloques).map(([bloque, habs]) => `
+    <div style="grid-column:1/-1;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:8px;">${bloque}</div>
+    ${habs.map(h => `
+      <div class="hab-chip ${h.estado}">
+        <div class="hab-chip-nombre">${h.nombre}</div>
+        <div class="hab-chip-tipo">${h.tipo}</div>
+        <div class="hab-chip-estado">${h.estado}</div>
+      </div>
+    `).join('')}
+  `).join('')
+}
+
+// Filtros de habitación
+document.querySelectorAll('.hab-filtro').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.hab-filtro').forEach(b => b.classList.remove('active'))
+    btn.classList.add('active')
+    filtroActual = btn.dataset.filtro
+    renderHabitaciones()
+  })
+})
+
+// ── Notificaciones ──────────────────────────────────────────
+async function cargarNotifPreview() {
+  const { data } = await sb.from('notificaciones')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(5)
+
+  renderNotifPreview(data || [])
+  actualizarBadge(data || [])
+}
+
+async function cargarNotifLista() {
+  const { data } = await sb.from('notificaciones')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(50)
+
+  renderNotifLista(data || [])
+  actualizarBadge(data || [])
+}
+
+function renderNotifPreview(notifs) {
+  const el = document.getElementById('notif-preview')
+  if (!notifs.length) {
+    el.innerHTML = '<div class="notif-empty">Sin notificaciones recientes.</div>'
+    return
+  }
+  el.innerHTML = `<div class="notif-list">${notifs.map(n => notifHTML(n)).join('')}</div>`
+}
+
+function renderNotifLista(notifs) {
+  const el = document.getElementById('notif-lista')
+  if (!notifs.length) {
+    el.innerHTML = '<div class="notif-empty">Sin notificaciones.</div>'
+    return
+  }
+  el.innerHTML = `<div class="notif-list">${notifs.map(n => notifHTML(n)).join('')}</div>`
+}
+
+function notifHTML(n) {
+  const hace = tiempoRelativo(n.created_at)
+  return `
+    <div class="notif-item ${n.leida ? '' : 'no-leida'}" onclick="marcarLeida(${n.id}, this)">
+      <div class="notif-dot ${n.tipo}"></div>
+      <div style="flex:1;">
+        <div class="notif-titulo">${n.titulo}</div>
+        ${n.mensaje ? `<div class="notif-mensaje">${n.mensaje}</div>` : ''}
+        <div class="notif-hora">${hace}</div>
+      </div>
+    </div>
+  `
+}
+
+function actualizarBadge(notifs) {
+  const noLeidas = notifs.filter(n => !n.leida).length
+  const badge    = document.getElementById('notif-badge')
+  const bnavBadge = document.getElementById('bnav-notif-badge')
+
+  if (noLeidas > 0) {
+    badge.textContent = noLeidas > 9 ? '9+' : noLeidas
+    badge.style.display = 'flex'
+    bnavBadge.textContent = noLeidas > 9 ? '9+' : noLeidas
+    bnavBadge.style.display = 'flex'
+  } else {
+    badge.style.display = 'none'
+    bnavBadge.style.display = 'none'
+  }
+}
+
+async function marcarLeida(id, el) {
+  el.classList.remove('no-leida')
+  await sb.from('notificaciones').update({ leida: true }).eq('id', id)
+}
+
+async function marcarTodasLeidas() {
+  await sb.from('notificaciones').update({ leida: true }).eq('leida', false)
+  await cargarNotifLista()
+  showAlert('Notificaciones marcadas como leídas', 'ok')
+}
+
+function tiempoRelativo(iso) {
+  const diff = Date.now() - new Date(iso).getTime()
+  const min  = Math.floor(diff / 60000)
+  if (min < 1)  return 'ahora'
+  if (min < 60) return `hace ${min} min`
+  const h = Math.floor(min / 60)
+  if (h < 24) return `hace ${h} h`
+  return `hace ${Math.floor(h / 24)} d`
+}
+
+// ── Realtime ────────────────────────────────────────────────
+function suscribirRealtime() {
+  sb.channel('hub-realtime')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notificaciones' },
+      payload => {
+        showAlert(payload.new.titulo, 'warn')
+        cargarNotifPreview()
+        cargarStats()
+      })
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'habitaciones' },
+      () => { cargarHabitaciones(); cargarStats() })
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'caja_movimientos' },
+      () => cargarStats())
+    .subscribe()
+}
+
+// ── Navegación ──────────────────────────────────────────────
+function showSection(nombre) {
+  document.querySelectorAll('.hub-section').forEach(s => s.classList.remove('active'))
+  document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active'))
+  document.getElementById('sec-' + nombre).classList.add('active')
+  document.getElementById('nav-' + nombre).classList.add('active')
+
+  if (nombre === 'notificaciones') cargarNotifLista()
+  if (nombre === 'habitaciones')   renderHabitaciones()
+
+  document.getElementById('hub-title').textContent = {
+    dashboard:      'Hub',
+    habitaciones:   'Habitaciones',
+    notificaciones: 'Notificaciones',
+  }[nombre] || 'Hub'
+}
+
+init()
+</script>
+</body>
+</html>

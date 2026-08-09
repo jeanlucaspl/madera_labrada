@@ -48,20 +48,58 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-// Verifica sesión. Redirige a login si no hay sesión o perfil inactivo.
-// Si rolEsperado es 'admin' y el usuario es 'empleado', redirige a empleado.html y viceversa.
-async function requireAuth(rolEsperado = null) {
+// Mapa de destino según rol y área
+const DESTINOS = {
+  superadmin: 'hub.html',
+  admin: {
+    'Cocina':     'panel_cocina.html',
+    'Limpieza':   'panel_limpieza.html',
+    'Recepción':  'panel_recepcion.html',
+    'Inventario': 'panel_inventario.html',
+    'RRHH':       'panel_rrhh.html',
+  },
+  empleado: 'empleado.html',
+}
+
+// Redirige al panel correcto según rol + área
+function redirigirSegunRol(perfil) {
+  if (perfil.rol === 'superadmin') {
+    location.href = DESTINOS.superadmin
+  } else if (perfil.rol === 'admin') {
+    location.href = DESTINOS.admin[perfil.area] || 'empleado.html'
+  } else {
+    location.href = DESTINOS.empleado
+  }
+}
+
+// Verifica sesión activa. Redirige a login si no hay sesión o perfil inactivo.
+// rolesPermitidos: array de roles válidos para esta página, ej: ['superadmin','admin']
+// areasPermitidas: array de áreas válidas, ej: ['Cocina','Inventario'] (null = cualquier área)
+async function requireAuth(rolesPermitidos = null, areasPermitidas = null) {
   const { data: { session } } = await sb.auth.getSession()
   if (!session) { location.href = 'login.html'; return null }
 
   const { data: perfil } = await sb.from('perfiles').select('*').eq('id', session.user.id).single()
   if (!perfil || !perfil.activo) { await sb.auth.signOut(); location.href = 'login.html'; return null }
 
-  if (rolEsperado && perfil.rol !== rolEsperado) {
-    location.href = perfil.rol === 'admin' ? 'admin.html' : 'empleado.html'
+  // Verificar rol
+  if (rolesPermitidos && !rolesPermitidos.includes(perfil.rol)) {
+    redirigirSegunRol(perfil)
     return null
   }
+
+  // Verificar área (superadmin siempre pasa)
+  if (areasPermitidas && perfil.rol !== 'superadmin' && !areasPermitidas.includes(perfil.area)) {
+    redirigirSegunRol(perfil)
+    return null
+  }
+
   return perfil
+}
+
+async function cerrarSesion() {
+  await sb.auth.signOut()
+  location.href = 'login.html'
 }
 
 function hoy() { return new Date().toISOString().slice(0, 10) }
