@@ -36,7 +36,6 @@
     sb.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) return
       const { data: p } = await sb.from('perfiles').select('rol,area,activo').eq('id', session.user.id).single()
-      sessionStorage.setItem('login_debug', JSON.stringify({ uid: session.user.id, p }))
       if (p && p.activo) redirigirSegunRol(p)
     })
 
@@ -63,8 +62,6 @@
 
       const { data: { user } } = await sb.auth.getUser()
       const { data: p } = await sb.from('perfiles').select('rol,area,activo').eq('id', user.id).single()
-      sessionStorage.setItem('login_submit_debug', JSON.stringify({ uid: user?.id, p }))
-
       if (!p || !p.activo) {
         await sb.auth.signOut()
         err.textContent = 'Cuenta desactivada. Contactá al administrador.'
