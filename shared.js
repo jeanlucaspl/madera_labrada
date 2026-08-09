@@ -63,6 +63,7 @@ const DESTINOS = {
 
 // Redirige al panel correcto según rol + área
 function redirigirSegunRol(perfil) {
+  sessionStorage.setItem('redir_debug', JSON.stringify({ rol: perfil?.rol, area: perfil?.area, activo: perfil?.activo }))
   if (perfil.rol === 'superadmin') {
     location.href = DESTINOS.superadmin
   } else if (perfil.rol === 'admin') {
