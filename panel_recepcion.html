@@ -401,8 +401,6 @@
 <script>
 'use strict'
 
-// Token para API de DNI (apis.net.pe — registrarse en https://apis.net.pe)
-const DNI_API_TOKEN = 'apis-token-demo'  // <-- reemplazar con token real
 
 let perfil = null
 let habitacionesData = []
@@ -580,21 +578,18 @@ async function buscarDni() {
     return
   }
 
-  // 2. Consultar API externa
+  // 2. Consultar proxy eldni.com
   try {
-    const res = await fetch(`https://api.apis.net.pe/v2/dni?numero=${dni}`, {
-      headers: { 'Authorization': `Bearer ${DNI_API_TOKEN}`, 'Content-Type': 'application/json' }
-    })
-    if (!res.ok) throw new Error()
+    const res = await fetch(`/.netlify/functions/buscar-dni?dni=${dni}`)
     const data = await res.json()
-    if (data.nombres) {
+    if (res.ok && data.nombres) {
       document.getElementById('ci-nombres').value = data.nombres || ''
-      document.getElementById('ci-apepat').value  = data.apellidoPaterno || ''
-      document.getElementById('ci-apemat').value  = data.apellidoMaterno || ''
+      document.getElementById('ci-apepat').value  = data.apellido_paterno || ''
+      document.getElementById('ci-apemat').value  = data.apellido_materno || ''
       statusEl.textContent = '✓ Datos obtenidos de RENIEC'
       statusEl.className = 'dni-status ok-msg'
     } else {
-      statusEl.textContent = 'DNI no encontrado en RENIEC'
+      statusEl.textContent = 'DNI no encontrado — ingresá los datos manualmente'
       statusEl.className = 'dni-status err-msg'
     }
   } catch {
