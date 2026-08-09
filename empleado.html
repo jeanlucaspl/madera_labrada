@@ -83,7 +83,7 @@
 
     // ── Init ────────────────────────────────────────────
     async function init() {
-      perfil = await requireAuth('empleado')
+      perfil = await requireAuth(['superadmin', 'admin', 'empleado'])
       if (!perfil) return
 
       document.getElementById('h-nombre').textContent = `${perfil.nombre} ${perfil.apellido}`
