@@ -22,7 +22,7 @@ exports.handler = async function(event) {
     const html1 = await r1.text()
 
     const tokenMatch = html1.match(/name="_token"\s+value="([^"]+)"/)
-    if (!tokenMatch) return { statusCode: 502, headers, body: JSON.stringify({ error: 'Sin token CSRF' }) }
+    if (!tokenMatch) return { statusCode: 502, headers, body: JSON.stringify({ error: 'Sin token CSRF', status: r1.status, html_preview: html1.slice(0, 300) }) }
     const token = tokenMatch[1]
 
     const rawCookies = r1.headers.getSetCookie ? r1.headers.getSetCookie() : []
