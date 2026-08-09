@@ -365,15 +365,25 @@ let filtroActual = ''
 
 // ── Inicialización ──────────────────────────────────────────
 async function init() {
-  const perfil = await requireAuth(['superadmin'])
-  if (!perfil) return
+  sessionStorage.setItem('hub_init', '1')
+
+  const { data: { session } } = await sb.auth.getSession()
+  sessionStorage.setItem('hub_session', session ? session.user.id : 'null')
+  if (!session) { location.href = 'login.html'; return }
+
+  const { data: perfil, error: perfilErr } = await sb.from('perfiles')
+    .select('*').eq('id', session.user.id).single()
+  sessionStorage.setItem('hub_perfil', JSON.stringify({ perfil, error: perfilErr?.message }))
+
+  if (!perfil || !perfil.activo) { await sb.auth.signOut(); location.href = 'login.html'; return }
+  if (!['superadmin'].includes(perfil.rol)) { redirigirSegunRol(perfil); return }
 
   // Saludo
   document.getElementById('saludo-nombre').textContent = perfil.nombre
   document.getElementById('saludo-fecha').textContent =
     new Date().toLocaleDateString('es-PE', { weekday:'long', day:'numeric', month:'long' })
 
-  lucide.createIcons()
+  if (typeof lucide !== 'undefined') lucide.createIcons()
 
   await Promise.all([
     cargarStats(),
