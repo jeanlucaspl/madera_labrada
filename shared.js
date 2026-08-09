@@ -1,4 +1,5 @@
 'use strict'
+alert('shared.js v2 cargado — DESTINOS existe: ' + (typeof DESTINOS !== 'undefined'))
 
 // ── Ubicación del hotel ───────────────────────────────
 const HOTEL_LAT    = -6.4726691
@@ -63,6 +64,7 @@ const DESTINOS = {
 
 // Redirige al panel correcto según rol + área
 function redirigirSegunRol(perfil) {
+  alert('redirigirSegunRol → rol: ' + perfil?.rol + ' | area: ' + perfil?.area)
   sessionStorage.setItem('redir_debug', JSON.stringify({ rol: perfil?.rol, area: perfil?.area, activo: perfil?.activo }))
   if (perfil.rol === 'superadmin') {
     location.href = DESTINOS.superadmin
