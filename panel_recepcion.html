@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Madera Labrada — Recepción</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    /* ── Habitaciones ── */
+    .hab-filtros { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+    .hab-grid    { display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); gap:8px; }
+
+    .hab-card {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    .hab-card:hover { background: rgba(255,255,255,.04); }
+    .hab-card-nombre { font-size: 15px; font-weight: 700; color: var(--text); }
+    .hab-card-tipo   { font-size: 10px; color: var(--muted); margin: 3px 0; line-height: 1.3; }
+    .hab-card-estado { font-size: 11px; font-weight: 600; margin-top: 6px; }
+
+    .hab-card.Disponible   { border-color: var(--ok); }
+    .hab-card.Ocupado      { border-color: var(--err); }
+    .hab-card.Limpieza     { border-color: #b07ad8; }
+    .hab-card.Mantenimiento{ border-color: var(--muted); }
+
+    .hab-card.Disponible   .hab-card-estado { color: var(--ok); }
+    .hab-card.Ocupado      .hab-card-estado { color: var(--err); }
+    .hab-card.Limpieza     .hab-card-estado { color: #b07ad8; }
+    .hab-card.Mantenimiento .hab-card-estado{ color: var(--muted); }
+
+    .bloque-label {
+      grid-column: 1/-1;
+      font-size: 11px; font-weight:700; text-transform:uppercase;
+      letter-spacing:.5px; color:var(--muted); margin-top:8px;
+    }
+
+    /* Resumen estados */
+    .estados-resumen { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+    .est-chip {
+      display:flex; align-items:center; gap:6px;
+      background:var(--card); border:1px solid var(--border);
+      border-radius:20px; padding:5px 12px; font-size:12px; font-weight:600;
+    }
+    .est-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+    /* ── Caja ── */
+    .caja-resumen {
+      display:grid; grid-template-columns:repeat(3,1fr);
+      gap:10px; margin-bottom:20px;
+    }
+    .caja-stat {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:var(--radius); padding:14px 12px; text-align:center;
+    }
+    .caja-stat-num   { font-size:22px; font-weight:700; }
+    .caja-stat-label { font-size:11px; color:var(--muted); margin-top:3px; }
+    .num-ok   { color:var(--ok); }
+    .num-err  { color:var(--err); }
+    .num-gold { color:var(--accent); }
+
+    .mov-row {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:10px 0; border-bottom:1px solid var(--border); font-size:14px; gap:8px;
+    }
+    .mov-row:last-child { border-bottom:none; }
+    .mov-concepto { font-size:13px; color:var(--text); }
+    .mov-meta     { font-size:11px; color:var(--muted); margin-top:2px; }
+
+    /* Links al sistema PHP */
+    .php-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+    .php-link {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:var(--radius); padding:14px 12px;
+      display:flex; align-items:center; gap:12px;
+      cursor:pointer; text-decoration:none;
+      transition:border-color .15s;
+    }
+    .php-link:hover { border-color:var(--accent); }
+    .php-link-icon  { width:36px; height:36px; border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .php-link-name  { font-size:13px; font-weight:600; color:var(--text); }
+    .php-link-desc  { font-size:11px; color:var(--muted); margin-top:2px; }
+
+    /* Notificaciones */
+    .notif-item {
+      background:var(--card); border:1px solid var(--border);
+      border-left:3px solid var(--border);
+      border-radius:var(--radius-sm); padding:12px 14px;
+      margin-bottom:10px; cursor:pointer;
+    }
+    .notif-item.no-leida { border-left-color:var(--accent); }
+    .notif-titulo  { font-size:13px; font-weight:600; }
+    .notif-mensaje { font-size:12px; color:var(--muted); margin-top:3px; }
+    .notif-hora    { font-size:11px; color:var(--muted); margin-top:4px; }
+
+    @media(max-width:480px){
+      .caja-resumen { grid-template-columns:repeat(3,1fr); gap:8px; }
+      .caja-stat-num { font-size:18px; }
+      .php-grid { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="global-alert" class="global-alert" style="display:none"></div>
+
+<!-- ── Header ── -->
+<header class="admin-header">
+  <img src="madera_labrada_logo-removebg-preview.png" alt="Madera Labrada" style="height:26px;">
+  <span class="admin-header-title" id="page-title">Recepción</span>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <button onclick="showSection('notificaciones')" style="background:transparent;border:none;color:var(--muted);padding:6px;position:relative;" title="Notificaciones">
+      <i data-lucide="bell" style="width:22px;height:22px;"></i>
+      <span id="notif-badge" style="position:absolute;top:0;right:0;background:var(--err);color:#fff;font-size:10px;font-weight:700;width:16px;height:16px;border-radius:50%;display:none;align-items:center;justify-content:center;"></span>
+    </button>
+    <button class="btn-ghost-sm" onclick="cerrarSesion()">Salir</button>
+  </div>
+</header>
+
+<main class="main-content">
+
+  <!-- ════ HABITACIONES ════ -->
+  <div class="section active" id="sec-habitaciones">
+
+    <div class="section-title">Habitaciones</div>
+
+    <!-- Resumen estados -->
+    <div class="estados-resumen">
+      <div class="est-chip"><div class="est-dot" style="background:var(--ok)"></div><span id="cnt-disponible">—</span> Disponibles</div>
+      <div class="est-chip"><div class="est-dot" style="background:var(--err)"></div><span id="cnt-ocupado">—</span> Ocupadas</div>
+      <div class="est-chip"><div class="est-dot" style="background:#b07ad8"></div><span id="cnt-limpieza">—</span> Limpieza</div>
+      <div class="est-chip"><div class="est-dot" style="background:var(--muted)"></div><span id="cnt-mant">—</span> Mant.</div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="hab-filtros">
+      <button class="btn-ghost btn-sm hab-fil active" data-f="">Todas</button>
+      <button class="btn-ghost btn-sm hab-fil" data-f="Disponible">Disponible</button>
+      <button class="btn-ghost btn-sm hab-fil" data-f="Ocupado">Ocupado</button>
+      <button class="btn-ghost btn-sm hab-fil" data-f="Limpieza">Limpieza</button>
+      <button class="btn-ghost btn-sm hab-fil" data-f="Mantenimiento">Mant.</button>
+    </div>
+
+    <div class="hab-grid" id="hab-grid"><div class="muted">Cargando...</div></div>
+  </div>
+
+  <!-- ════ CAJA ════ -->
+  <div class="section" id="sec-caja">
+    <div class="section-title">Caja del turno</div>
+
+    <!-- Resumen del día -->
+    <div class="caja-resumen">
+      <div class="caja-stat">
+        <div class="caja-stat-num num-ok"  id="caja-ingresos">S/0</div>
+        <div class="caja-stat-label">Ingresos</div>
+      </div>
+      <div class="caja-stat">
+        <div class="caja-stat-num num-err" id="caja-egresos">S/0</div>
+        <div class="caja-stat-label">Egresos</div>
+      </div>
+      <div class="caja-stat">
+        <div class="caja-stat-num num-gold" id="caja-saldo">S/0</div>
+        <div class="caja-stat-label">Saldo</div>
+      </div>
+    </div>
+
+    <!-- Acciones rápidas -->
+    <div style="display:flex;gap:10px;margin-bottom:20px;">
+      <button class="btn-primary" style="flex:1;" onclick="abrirModalMovimiento('ingreso')">+ Ingreso</button>
+      <button class="btn-danger"  style="flex:1;padding:10px 20px;" onclick="abrirModalMovimiento('egreso')">− Egreso</button>
+    </div>
+
+    <!-- Movimientos del día -->
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div style="padding:14px 16px 0;"><div class="card-title">Movimientos de hoy</div></div>
+      <div id="mov-lista" style="padding:0 16px 14px;"><div class="muted">Cargando...</div></div>
+    </div>
+
+    <!-- Acceso al sistema PHP (facturación) -->
+    <div class="card-title" style="margin-top:20px;margin-bottom:12px;">Sistema de facturación</div>
+    <div class="php-grid">
+      <a class="php-link" href="https://hotelmaderalabradat.jjingenieros.pe/index.php?view=newfactura" target="_blank">
+        <div class="php-link-icon" style="background:rgba(200,164,90,.15);color:var(--accent);"><i data-lucide="file-text" style="width:18px;height:18px;"></i></div>
+        <div><div class="php-link-name">Nueva factura</div><div class="php-link-desc">Boleta / Factura electrónica</div></div>
+      </a>
+      <a class="php-link" href="https://hotelmaderalabradat.jjingenieros.pe/index.php?view=pre_venta" target="_blank">
+        <div class="php-link-icon" style="background:rgba(90,158,111,.15);color:var(--ok);"><i data-lucide="shopping-cart" style="width:18px;height:18px;"></i></div>
+        <div><div class="php-link-name">Punto de venta</div><div class="php-link-desc">Venta de productos y servicios</div></div>
+      </a>
+      <a class="php-link" href="https://hotelmaderalabradat.jjingenieros.pe/index.php?view=apertura_caja" target="_blank">
+        <div class="php-link-icon" style="background:rgba(90,158,111,.15);color:var(--ok);"><i data-lucide="lock-open" style="width:18px;height:18px;"></i></div>
+        <div><div class="php-link-name">Apertura caja</div><div class="php-link-desc">Abrir turno de caja</div></div>
+      </a>
+      <a class="php-link" href="https://hotelmaderalabradat.jjingenieros.pe/index.php?view=cierre_caja" target="_blank">
+        <div class="php-link-icon" style="background:rgba(192,80,80,.15);color:var(--err);"><i data-lucide="lock" style="width:18px;height:18px;"></i></div>
+        <div><div class="php-link-name">Cierre caja</div><div class="php-link-desc">Cerrar y liquidar turno</div></div>
+      </a>
+      <a class="php-link" href="https://hotelmaderalabradat.jjingenieros.pe/index.php?view=resumen_caja" target="_blank">
+        <div class="php-link-icon" style="background:rgba(100,140,200,.15);color:#7aaad8;"><i data-lucide="clipboard-list" style="width:18px;height:18px;"></i></div>
+        <div><div class="php-link-name">Resumen</div><div class="php-link-desc">Liquidación del turno</div></div>
+      </a>
+      <a class="php-link" href="https://hotelmaderalabradat.jjingenieros.pe/index.php?view=reporte_caja" target="_blank">
+        <div class="php-link-icon" style="background:rgba(90,160,160,.15);color:#7ad8d8;"><i data-lucide="bar-chart-2" style="width:18px;height:18px;"></i></div>
+        <div><div class="php-link-name">Reporte caja</div><div class="php-link-desc">Historial de movimientos</div></div>
+      </a>
+      <a class="php-link" href="https://hotelmaderalabradat.jjingenieros.pe/index.php?view=listafe" target="_blank">
+        <div class="php-link-icon" style="background:rgba(160,120,200,.15);color:#b07ad8;"><i data-lucide="receipt" style="width:18px;height:18px;"></i></div>
+        <div><div class="php-link-name">Documentos</div><div class="php-link-desc">Lista de comprobantes emitidos</div></div>
+      </a>
+      <a class="php-link" href="https://hotelmaderalabradat.jjingenieros.pe/index.php?view=egreso" target="_blank">
+        <div class="php-link-icon" style="background:rgba(192,80,80,.15);color:var(--err);"><i data-lucide="trending-down" style="width:18px;height:18px;"></i></div>
+        <div><div class="php-link-name">Egresos</div><div class="php-link-desc">Registrar gasto o salida</div></div>
+      </a>
+    </div>
+  </div>
+
+  <!-- ════ NOTIFICACIONES ════ -->
+  <div class="section" id="sec-notificaciones">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div class="section-title" style="margin-bottom:0;">Notificaciones</div>
+      <button class="btn-ghost-sm" onclick="marcarTodasLeidas()">Marcar leídas</button>
+    </div>
+    <div id="notif-lista"><div class="muted" style="text-align:center;padding:24px;">Cargando...</div></div>
+  </div>
+
+</main>
+
+<!-- ── Bottom Nav ── -->
+<nav class="bottom-nav">
+  <button class="bnav-item active" id="nav-habitaciones"   onclick="showSection('habitaciones')">
+    <span class="bnav-icon"><i data-lucide="bed-double"></i></span><span>Habitaciones</span>
+  </button>
+  <button class="bnav-item"        id="nav-caja"           onclick="showSection('caja')">
+    <span class="bnav-icon"><i data-lucide="banknote"></i></span><span>Caja</span>
+  </button>
+  <button class="bnav-item"        id="nav-notificaciones" onclick="showSection('notificaciones')">
+    <span class="bnav-icon" style="position:relative;">
+      <i data-lucide="bell"></i>
+      <span id="bnav-badge" style="position:absolute;top:-4px;right:-6px;background:var(--err);color:#fff;font-size:9px;font-weight:700;width:14px;height:14px;border-radius:50%;display:none;align-items:center;justify-content:center;"></span>
+    </span>
+    <span>Alertas</span>
+  </button>
+</nav>
+
+<!-- ── Modal: Cambiar estado habitación ── -->
+<div id="modal-hab" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <div class="modal-title" id="modal-hab-titulo">Habitación</div>
+    <div style="margin-bottom:12px;font-size:13px;color:var(--muted);" id="modal-hab-tipo"></div>
+    <input type="hidden" id="modal-hab-id">
+
+    <div class="field">
+      <label>Cambiar estado</label>
+      <select id="modal-hab-estado">
+        <option value="Disponible">Disponible</option>
+        <option value="Ocupado">Ocupado</option>
+        <option value="Limpieza">Limpieza</option>
+        <option value="Mantenimiento">Mantenimiento</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Observación (opcional)</label>
+      <textarea id="modal-hab-obs" placeholder="Ej: check-in familia García, 2 noches..."></textarea>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="cerrarModalHab()">Cancelar</button>
+      <button class="btn-primary" onclick="guardarEstadoHab()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Movimiento de caja ── -->
+<div id="modal-mov" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <div class="modal-title" id="modal-mov-titulo">Registrar ingreso</div>
+    <input type="hidden" id="modal-mov-tipo">
+
+    <div class="field">
+      <label>Categoría</label>
+      <select id="modal-mov-cat">
+        <option value="habitacion">Habitación</option>
+        <option value="bazar">Bazar / Tienda</option>
+        <option value="servicio">Servicio</option>
+        <option value="otro">Otro ingreso</option>
+      </select>
+    </div>
+    <div class="field" id="campo-egreso-cat" style="display:none;">
+      <label>Categoría egreso</label>
+      <select id="modal-mov-cat-egr">
+        <option value="compras">Compras / Reposición</option>
+        <option value="servicios">Servicios externos</option>
+        <option value="mantenimiento">Mantenimiento</option>
+        <option value="pago_personal">Pago a personal</option>
+        <option value="otro">Otro egreso</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Concepto *</label>
+      <input type="text" id="modal-mov-concepto" placeholder="Ej: Habitación 105, 1 noche">
+    </div>
+    <div class="field">
+      <label>Monto (S/) *</label>
+      <input type="number" id="modal-mov-monto" placeholder="0.00" min="0.01" step="0.01" inputmode="decimal">
+    </div>
+    <div class="field">
+      <label>Método de pago</label>
+      <select id="modal-mov-metodo">
+        <option value="efectivo">Efectivo</option>
+        <option value="yape">Yape</option>
+        <option value="pos">POS / Tarjeta</option>
+        <option value="transferencia">Transferencia</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Referencia (opcional)</label>
+      <input type="text" id="modal-mov-ref" placeholder="Nro. habitación, pedido, etc.">
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="cerrarModalMov()">Cancelar</button>
+      <button class="btn-primary" id="btn-guardar-mov" onclick="guardarMovimiento()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="shared.js"></script>
+<script>
+'use strict'
+
+let perfil = null
+let habitacionesData = []
+let filtroHab = ''
+
+// ── Init ────────────────────────────────────────────────────
+async function init() {
+  perfil = await requireAuth(['superadmin','admin','empleado'], ['Recepción'])
+  if (!perfil) return
+
+  lucide.createIcons()
+
+  await Promise.all([
+    cargarHabitaciones(),
+    cargarCaja(),
+    cargarNotificaciones(),
+  ])
+
+  suscribirRealtime()
+}
+
+// ── Habitaciones ────────────────────────────────────────────
+async function cargarHabitaciones() {
+  const { data, error } = await sb.from('habitaciones')
+    .select('id, nombre, tipo, bloque, estado')
+    .eq('activo', true)
+    .order('bloque').order('nombre')
+
+  if (error) { showAlert('Error cargando habitaciones', 'err'); return }
+  habitacionesData = data || []
+  actualizarContadores()
+  renderHabitaciones()
+}
+
+function actualizarContadores() {
+  const cnt = { Disponible:0, Ocupado:0, Limpieza:0, Mantenimiento:0 }
+  habitacionesData.forEach(h => cnt[h.estado] = (cnt[h.estado]||0) + 1)
+  document.getElementById('cnt-disponible').textContent = cnt.Disponible
+  document.getElementById('cnt-ocupado').textContent    = cnt.Ocupado
+  document.getElementById('cnt-limpieza').textContent   = cnt.Limpieza
+  document.getElementById('cnt-mant').textContent       = cnt.Mantenimiento
+}
+
+function renderHabitaciones() {
+  const grid = document.getElementById('hab-grid')
+  const lista = filtroHab ? habitacionesData.filter(h => h.estado === filtroHab) : habitacionesData
+
+  if (!lista.length) { grid.innerHTML = '<div class="muted">Sin habitaciones.</div>'; return }
+
+  const bloques = {}
+  lista.forEach(h => { if (!bloques[h.bloque]) bloques[h.bloque] = []; bloques[h.bloque].push(h) })
+
+  grid.innerHTML = Object.entries(bloques).map(([bloque, habs]) => `
+    <div class="bloque-label">${bloque}</div>
+    ${habs.map(h => `
+      <div class="hab-card ${h.estado}" onclick="abrirModalHab(${h.id})">
+        <div class="hab-card-nombre">${h.nombre}</div>
+        <div class="hab-card-tipo">${h.tipo}</div>
+        <div class="hab-card-estado">${h.estado}</div>
+      </div>
+    `).join('')}
+  `).join('')
+}
+
+// Filtros
+document.querySelectorAll('.hab-fil').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.hab-fil').forEach(b => b.classList.remove('active'))
+    btn.classList.add('active')
+    filtroHab = btn.dataset.f
+    renderHabitaciones()
+  })
+})
+
+// ── Modal habitación ────────────────────────────────────────
+function abrirModalHab(id) {
+  const h = habitacionesData.find(x => x.id === id)
+  if (!h) return
+  document.getElementById('modal-hab-id').value      = id
+  document.getElementById('modal-hab-titulo').textContent = `Habitación ${h.nombre}`
+  document.getElementById('modal-hab-tipo').textContent   = h.tipo + ' · ' + h.bloque
+  document.getElementById('modal-hab-estado').value  = h.estado
+  document.getElementById('modal-hab-obs').value     = ''
+  document.getElementById('modal-hab').style.display = 'flex'
+}
+
+function cerrarModalHab() { document.getElementById('modal-hab').style.display = 'none' }
+
+async function guardarEstadoHab() {
+  const id      = parseInt(document.getElementById('modal-hab-id').value)
+  const estado  = document.getElementById('modal-hab-estado').value
+  const obs     = document.getElementById('modal-hab-obs').value.trim()
+
+  const { error } = await sb.from('habitaciones').update({ estado }).eq('id', id)
+  if (error) { showAlert('Error al actualizar', 'err'); return }
+
+  // Log manual si tiene observación (el trigger ya loguea sin obs)
+  if (obs) {
+    await sb.from('habitaciones_log').insert({
+      habitacion_id:  id,
+      estado_nuevo:   estado,
+      observacion:    obs,
+      registrado_por: perfil.id,
+    })
+  }
+
+  cerrarModalHab()
+  showAlert('Estado actualizado', 'ok')
+  await cargarHabitaciones()
+}
+
+// ── Caja ────────────────────────────────────────────────────
+async function cargarCaja() {
+  const hoyStr = new Date().toISOString().slice(0, 10)
+
+  const { data: movs } = await sb.from('caja_movimientos')
+    .select('id, tipo, categoria, concepto, monto, metodo_pago, area, created_at, anulado, perfiles(nombre,apellido)')
+    .eq('anulado', false)
+    .gte('created_at', hoyStr + 'T00:00:00')
+    .order('created_at', { ascending: false })
+
+  const lista = movs || []
+  const ingresos = lista.filter(m => m.tipo==='ingreso').reduce((s,m) => s+parseFloat(m.monto), 0)
+  const egresos  = lista.filter(m => m.tipo==='egreso').reduce((s,m)  => s+parseFloat(m.monto), 0)
+
+  document.getElementById('caja-ingresos').textContent = 'S/' + ingresos.toFixed(2)
+  document.getElementById('caja-egresos').textContent  = 'S/' + egresos.toFixed(2)
+  document.getElementById('caja-saldo').textContent    = 'S/' + (ingresos - egresos).toFixed(2)
+
+  const el = document.getElementById('mov-lista')
+  if (!lista.length) { el.innerHTML = '<div class="muted" style="padding:12px 0;">Sin movimientos hoy.</div>'; return }
+
+  el.innerHTML = lista.map(m => `
+    <div class="mov-row">
+      <div>
+        <div class="mov-concepto">${m.concepto}</div>
+        <div class="mov-meta">${m.categoria} · ${m.metodo_pago || '—'} · ${fmtHora(m.created_at)}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;">
+        <span style="font-weight:700;color:${m.tipo==='ingreso'?'var(--ok)':'var(--err)'};">
+          ${m.tipo==='ingreso'?'+':'−'}S/${parseFloat(m.monto).toFixed(2)}
+        </span>
+      </div>
+    </div>
+  `).join('')
+}
+
+// ── Modal movimiento ────────────────────────────────────────
+function abrirModalMovimiento(tipo) {
+  document.getElementById('modal-mov-tipo').value       = tipo
+  document.getElementById('modal-mov-titulo').textContent = tipo === 'ingreso' ? 'Registrar ingreso' : 'Registrar egreso'
+  document.getElementById('modal-mov-concepto').value   = ''
+  document.getElementById('modal-mov-monto').value      = ''
+  document.getElementById('modal-mov-ref').value        = ''
+  document.getElementById('modal-mov-metodo').value     = 'efectivo'
+
+  // Mostrar categorías según tipo
+  const catIng = document.getElementById('modal-mov-cat').parentElement
+  const catEgr = document.getElementById('campo-egreso-cat')
+  if (tipo === 'ingreso') { catIng.style.display=''; catEgr.style.display='none' }
+  else                    { catIng.style.display='none'; catEgr.style.display='' }
+
+  document.getElementById('modal-mov').style.display = 'flex'
+}
+
+function cerrarModalMov() { document.getElementById('modal-mov').style.display = 'none' }
+
+async function guardarMovimiento() {
+  const tipo     = document.getElementById('modal-mov-tipo').value
+  const concepto = document.getElementById('modal-mov-concepto').value.trim()
+  const monto    = parseFloat(document.getElementById('modal-mov-monto').value)
+  const metodo   = document.getElementById('modal-mov-metodo').value
+  const ref      = document.getElementById('modal-mov-ref').value.trim()
+  const cat      = tipo === 'ingreso'
+    ? document.getElementById('modal-mov-cat').value
+    : document.getElementById('modal-mov-cat-egr').value
+
+  if (!concepto) { showAlert('Ingresá un concepto', 'err'); return }
+  if (!monto || monto <= 0) { showAlert('Ingresá un monto válido', 'err'); return }
+
+  const btn = document.getElementById('btn-guardar-mov')
+  btn.disabled = true
+
+  const { error } = await sb.from('caja_movimientos').insert({
+    tipo, categoria: cat, concepto, monto, metodo_pago: metodo,
+    referencia: ref || null, area: 'Recepción', registrado_por: perfil.id,
+  })
+
+  btn.disabled = false
+  if (error) { showAlert('Error al registrar', 'err'); return }
+
+  cerrarModalMov()
+  showAlert(`${tipo === 'ingreso' ? 'Ingreso' : 'Egreso'} registrado`, 'ok')
+  await cargarCaja()
+}
+
+// ── Notificaciones ──────────────────────────────────────────
+async function cargarNotificaciones() {
+  const { data } = await sb.from('notificaciones')
+    .select('*')
+    .or('area_destino.eq.Recepción,area_destino.is.null')
+    .order('created_at', { ascending: false })
+    .limit(40)
+
+  renderNotificaciones(data || [])
+  actualizarBadge(data || [])
+}
+
+function renderNotificaciones(notifs) {
+  const el = document.getElementById('notif-lista')
+  if (!notifs.length) { el.innerHTML = '<div class="muted" style="text-align:center;padding:24px;">Sin notificaciones.</div>'; return }
+
+  el.innerHTML = notifs.map(n => `
+    <div class="notif-item ${n.leida ? '' : 'no-leida'}" onclick="marcarLeida(${n.id}, this)">
+      <div class="notif-titulo">${n.titulo}</div>
+      ${n.mensaje ? `<div class="notif-mensaje">${n.mensaje}</div>` : ''}
+      <div class="notif-hora">${tiempoRelativo(n.created_at)}</div>
+    </div>
+  `).join('')
+}
+
+function actualizarBadge(notifs) {
+  const n = notifs.filter(x => !x.leida).length
+  ;['notif-badge','bnav-badge'].forEach(id => {
+    const el = document.getElementById(id)
+    el.textContent = n > 9 ? '9+' : n
+    el.style.display = n > 0 ? 'flex' : 'none'
+  })
+}
+
+async function marcarLeida(id, el) {
+  el.classList.remove('no-leida')
+  await sb.from('notificaciones').update({ leida: true }).eq('id', id)
+}
+
+async function marcarTodasLeidas() {
+  await sb.from('notificaciones').update({ leida: true })
+    .or('area_destino.eq.Recepción,area_destino.is.null').eq('leida', false)
+  await cargarNotificaciones()
+  showAlert('Marcadas como leídas', 'ok')
+}
+
+function tiempoRelativo(iso) {
+  const diff = Date.now() - new Date(iso).getTime()
+  const min  = Math.floor(diff / 60000)
+  if (min < 1)  return 'ahora'
+  if (min < 60) return `hace ${min} min`
+  const h = Math.floor(min / 60)
+  if (h < 24)  return `hace ${h} h`
+  return `hace ${Math.floor(h/24)} d`
+}
+
+// ── Realtime ────────────────────────────────────────────────
+function suscribirRealtime() {
+  sb.channel('recepcion-realtime')
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'habitaciones' },
+      () => cargarHabitaciones())
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notificaciones' },
+      payload => {
+        const n = payload.new
+        if (!n.area_destino || n.area_destino === 'Recepción') {
+          showAlert(n.titulo, 'warn')
+          cargarNotificaciones()
+        }
+      })
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'caja_movimientos' },
+      () => cargarCaja())
+    .subscribe()
+}
+
+// ── Navegación ──────────────────────────────────────────────
+function showSection(nombre) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'))
+  document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active'))
+  document.getElementById('sec-' + nombre).classList.add('active')
+  document.getElementById('nav-' + nombre).classList.add('active')
+  document.getElementById('page-title').textContent = {
+    habitaciones: 'Recepción', caja: 'Caja', notificaciones: 'Notificaciones'
+  }[nombre]
+  lucide.createIcons()
+}
+
+init()
+</script>
+</body>
+</html>
