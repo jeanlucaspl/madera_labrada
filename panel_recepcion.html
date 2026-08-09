@@ -10,99 +10,98 @@
     /* ── Habitaciones ── */
     .hab-filtros { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
     .hab-grid    { display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); gap:8px; }
+    .bloque-label{ grid-column:1/-1; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); margin-top:8px; }
 
     .hab-card {
-      background: var(--card);
-      border: 2px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px 10px;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color .15s, background .15s;
+      background:var(--card); border:2px solid var(--border);
+      border-radius:var(--radius); padding:12px 10px;
+      text-align:center; cursor:pointer;
+      transition:border-color .15s, background .15s;
     }
-    .hab-card:hover { background: rgba(255,255,255,.04); }
-    .hab-card-nombre { font-size: 15px; font-weight: 700; color: var(--text); }
-    .hab-card-tipo   { font-size: 10px; color: var(--muted); margin: 3px 0; line-height: 1.3; }
-    .hab-card-estado { font-size: 11px; font-weight: 600; margin-top: 6px; }
+    .hab-card:hover { background:rgba(255,255,255,.04); }
+    .hab-card-nombre { font-size:15px; font-weight:700; color:var(--text); }
+    .hab-card-tipo   { font-size:10px; color:var(--muted); margin:3px 0; line-height:1.3; }
+    .hab-card-estado { font-size:11px; font-weight:600; margin-top:6px; }
+    .hab-card-cliente{ font-size:10px; color:var(--muted); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-    .hab-card.Disponible   { border-color: var(--ok); }
-    .hab-card.Ocupado      { border-color: var(--err); }
-    .hab-card.Limpieza     { border-color: #b07ad8; }
-    .hab-card.Mantenimiento{ border-color: var(--muted); }
+    .hab-card.Disponible   { border-color:var(--ok); }
+    .hab-card.Ocupado      { border-color:var(--err); }
+    .hab-card.Limpieza     { border-color:#b07ad8; }
+    .hab-card.Mantenimiento{ border-color:var(--muted); }
+    .hab-card.Disponible   .hab-card-estado { color:var(--ok); }
+    .hab-card.Ocupado      .hab-card-estado { color:var(--err); }
+    .hab-card.Limpieza     .hab-card-estado { color:#b07ad8; }
+    .hab-card.Mantenimiento .hab-card-estado{ color:var(--muted); }
 
-    .hab-card.Disponible   .hab-card-estado { color: var(--ok); }
-    .hab-card.Ocupado      .hab-card-estado { color: var(--err); }
-    .hab-card.Limpieza     .hab-card-estado { color: #b07ad8; }
-    .hab-card.Mantenimiento .hab-card-estado{ color: var(--muted); }
+    .estados-resumen { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+    .est-chip { display:flex; align-items:center; gap:6px; background:var(--card); border:1px solid var(--border); border-radius:20px; padding:5px 12px; font-size:12px; font-weight:600; }
+    .est-dot  { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
 
-    .bloque-label {
-      grid-column: 1/-1;
-      font-size: 11px; font-weight:700; text-transform:uppercase;
-      letter-spacing:.5px; color:var(--muted); margin-top:8px;
-    }
-
-    /* Resumen estados */
-    .estados-resumen { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
-    .est-chip {
-      display:flex; align-items:center; gap:6px;
+    /* ── Clientes activos ── */
+    .cliente-card {
       background:var(--card); border:1px solid var(--border);
-      border-radius:20px; padding:5px 12px; font-size:12px; font-weight:600;
+      border-radius:var(--radius); padding:16px; margin-bottom:12px;
     }
-    .est-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .cliente-nombre  { font-size:16px; font-weight:700; color:var(--text); }
+    .cliente-dni     { font-size:12px; color:var(--muted); margin-top:2px; }
+    .cliente-habs    { display:flex; gap:6px; flex-wrap:wrap; margin:10px 0; }
+    .hab-tag {
+      background:var(--err-bg); border:1px solid var(--err);
+      color:var(--err); border-radius:12px; padding:3px 10px; font-size:12px; font-weight:600;
+    }
+    .cliente-total   { font-size:18px; font-weight:700; color:var(--accent); }
+    .cliente-actions { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+
+    /* Extra item */
+    .extra-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
+    .extra-row:last-child { border-bottom:none; }
 
     /* ── Caja ── */
-    .caja-resumen {
-      display:grid; grid-template-columns:repeat(3,1fr);
-      gap:10px; margin-bottom:20px;
-    }
-    .caja-stat {
-      background:var(--card); border:1px solid var(--border);
-      border-radius:var(--radius); padding:14px 12px; text-align:center;
-    }
-    .caja-stat-num   { font-size:22px; font-weight:700; }
+    .caja-resumen { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:18px; }
+    .caja-stat    { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:14px 12px; text-align:center; }
+    .caja-stat-num   { font-size:20px; font-weight:700; }
     .caja-stat-label { font-size:11px; color:var(--muted); margin-top:3px; }
-    .num-ok   { color:var(--ok); }
-    .num-err  { color:var(--err); }
-    .num-gold { color:var(--accent); }
 
-    .mov-row {
-      display:flex; justify-content:space-between; align-items:center;
-      padding:10px 0; border-bottom:1px solid var(--border); font-size:14px; gap:8px;
-    }
+    .mov-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); font-size:14px; gap:8px; }
     .mov-row:last-child { border-bottom:none; }
-    .mov-concepto { font-size:13px; color:var(--text); }
-    .mov-meta     { font-size:11px; color:var(--muted); margin-top:2px; }
+    .mov-meta { font-size:11px; color:var(--muted); margin-top:2px; }
 
-    /* Links al sistema PHP */
+    /* PHP links */
     .php-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
-    .php-link {
-      background:var(--card); border:1px solid var(--border);
-      border-radius:var(--radius); padding:14px 12px;
-      display:flex; align-items:center; gap:12px;
-      cursor:pointer; text-decoration:none;
-      transition:border-color .15s;
-    }
+    .php-link { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:14px 12px; display:flex; align-items:center; gap:12px; text-decoration:none; transition:border-color .15s; }
     .php-link:hover { border-color:var(--accent); }
-    .php-link-icon  { width:36px; height:36px; border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-    .php-link-name  { font-size:13px; font-weight:600; color:var(--text); }
-    .php-link-desc  { font-size:11px; color:var(--muted); margin-top:2px; }
+    .php-link-icon { width:36px; height:36px; border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .php-link-name { font-size:13px; font-weight:600; color:var(--text); }
+    .php-link-desc { font-size:11px; color:var(--muted); margin-top:2px; }
 
-    /* Notificaciones */
-    .notif-item {
-      background:var(--card); border:1px solid var(--border);
-      border-left:3px solid var(--border);
-      border-radius:var(--radius-sm); padding:12px 14px;
-      margin-bottom:10px; cursor:pointer;
+    /* DNI lookup */
+    .dni-row { display:flex; gap:8px; align-items:flex-end; }
+    .dni-row .field { flex:1; margin-bottom:0; }
+    .dni-status { font-size:12px; margin-top:6px; min-height:18px; }
+
+    /* Habitaciones checkbox grid en modal */
+    .hab-check-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:8px; margin-top:8px; }
+    .hab-check-item {
+      border:2px solid var(--border); border-radius:var(--radius-sm);
+      padding:8px 6px; text-align:center; cursor:pointer; font-size:12px;
+      transition:border-color .15s, background .15s;
     }
+    .hab-check-item.selected { border-color:var(--accent); background:var(--warn-bg); }
+    .hab-check-item.disabled { opacity:.4; cursor:not-allowed; }
+    .hab-check-nombre { font-weight:700; font-size:13px; }
+    .hab-check-tipo   { font-size:10px; color:var(--muted); margin-top:2px; }
+
+    /* Notif */
+    .notif-item { background:var(--card); border:1px solid var(--border); border-left:3px solid var(--border); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:10px; cursor:pointer; }
     .notif-item.no-leida { border-left-color:var(--accent); }
     .notif-titulo  { font-size:13px; font-weight:600; }
     .notif-mensaje { font-size:12px; color:var(--muted); margin-top:3px; }
     .notif-hora    { font-size:11px; color:var(--muted); margin-top:4px; }
 
     @media(max-width:480px){
-      .caja-resumen { grid-template-columns:repeat(3,1fr); gap:8px; }
-      .caja-stat-num { font-size:18px; }
       .php-grid { grid-template-columns:1fr; }
+      .caja-stat-num { font-size:16px; }
+      .cliente-actions { flex-direction:column; }
     }
   </style>
 </head>
@@ -114,7 +113,7 @@
   <img src="madera_labrada_logo-removebg-preview.png" alt="Madera Labrada" style="height:26px;">
   <span class="admin-header-title" id="page-title">Recepción</span>
   <div style="display:flex;gap:8px;align-items:center;">
-    <button onclick="showSection('notificaciones')" style="background:transparent;border:none;color:var(--muted);padding:6px;position:relative;" title="Notificaciones">
+    <button onclick="showSection('notificaciones')" style="background:transparent;border:none;color:var(--muted);padding:6px;position:relative;">
       <i data-lucide="bell" style="width:22px;height:22px;"></i>
       <span id="notif-badge" style="position:absolute;top:0;right:0;background:var(--err);color:#fff;font-size:10px;font-weight:700;width:16px;height:16px;border-radius:50%;display:none;align-items:center;justify-content:center;"></span>
     </button>
@@ -126,18 +125,18 @@
 
   <!-- ════ HABITACIONES ════ -->
   <div class="section active" id="sec-habitaciones">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <div class="section-title" style="margin-bottom:0;">Habitaciones</div>
+      <button class="btn-primary btn-sm" onclick="abrirCheckin()">+ Check-in</button>
+    </div>
 
-    <div class="section-title">Habitaciones</div>
-
-    <!-- Resumen estados -->
     <div class="estados-resumen">
-      <div class="est-chip"><div class="est-dot" style="background:var(--ok)"></div><span id="cnt-disponible">—</span> Disponibles</div>
-      <div class="est-chip"><div class="est-dot" style="background:var(--err)"></div><span id="cnt-ocupado">—</span> Ocupadas</div>
+      <div class="est-chip"><div class="est-dot" style="background:var(--ok)"></div><span id="cnt-disponible">—</span> Libre</div>
+      <div class="est-chip"><div class="est-dot" style="background:var(--err)"></div><span id="cnt-ocupado">—</span> Ocupada</div>
       <div class="est-chip"><div class="est-dot" style="background:#b07ad8"></div><span id="cnt-limpieza">—</span> Limpieza</div>
       <div class="est-chip"><div class="est-dot" style="background:var(--muted)"></div><span id="cnt-mant">—</span> Mant.</div>
     </div>
 
-    <!-- Filtros -->
     <div class="hab-filtros">
       <button class="btn-ghost btn-sm hab-fil active" data-f="">Todas</button>
       <button class="btn-ghost btn-sm hab-fil" data-f="Disponible">Disponible</button>
@@ -149,72 +148,60 @@
     <div class="hab-grid" id="hab-grid"><div class="muted">Cargando...</div></div>
   </div>
 
+  <!-- ════ CLIENTES ════ -->
+  <div class="section" id="sec-clientes">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div class="section-title" style="margin-bottom:0;">Clientes activos</div>
+      <button class="btn-primary btn-sm" onclick="abrirCheckin()">+ Check-in</button>
+    </div>
+    <div id="clientes-lista"><div class="muted" style="text-align:center;padding:32px;">Cargando...</div></div>
+  </div>
+
   <!-- ════ CAJA ════ -->
   <div class="section" id="sec-caja">
     <div class="section-title">Caja del turno</div>
 
-    <!-- Resumen del día -->
     <div class="caja-resumen">
-      <div class="caja-stat">
-        <div class="caja-stat-num num-ok"  id="caja-ingresos">S/0</div>
-        <div class="caja-stat-label">Ingresos</div>
-      </div>
-      <div class="caja-stat">
-        <div class="caja-stat-num num-err" id="caja-egresos">S/0</div>
-        <div class="caja-stat-label">Egresos</div>
-      </div>
-      <div class="caja-stat">
-        <div class="caja-stat-num num-gold" id="caja-saldo">S/0</div>
-        <div class="caja-stat-label">Saldo</div>
-      </div>
+      <div class="caja-stat"><div class="caja-stat-num" style="color:var(--ok)"  id="caja-ingresos">S/0</div><div class="caja-stat-label">Ingresos</div></div>
+      <div class="caja-stat"><div class="caja-stat-num" style="color:var(--err)" id="caja-egresos">S/0</div><div class="caja-stat-label">Egresos</div></div>
+      <div class="caja-stat"><div class="caja-stat-num" style="color:var(--accent)" id="caja-saldo">S/0</div><div class="caja-stat-label">Saldo</div></div>
     </div>
 
-    <!-- Acciones rápidas -->
     <div style="display:flex;gap:10px;margin-bottom:20px;">
-      <button class="btn-primary" style="flex:1;" onclick="abrirModalMovimiento('ingreso')">+ Ingreso</button>
-      <button class="btn-danger"  style="flex:1;padding:10px 20px;" onclick="abrirModalMovimiento('egreso')">− Egreso</button>
+      <button class="btn-primary" style="flex:1;" onclick="abrirModalMov('ingreso')">+ Ingreso</button>
+      <button class="btn-danger"  style="flex:1;padding:10px 20px;" onclick="abrirModalMov('egreso')">− Egreso</button>
     </div>
 
-    <!-- Movimientos del día -->
     <div class="card" style="padding:0;overflow:hidden;">
       <div style="padding:14px 16px 0;"><div class="card-title">Movimientos de hoy</div></div>
       <div id="mov-lista" style="padding:0 16px 14px;"><div class="muted">Cargando...</div></div>
     </div>
 
-    <!-- Acceso al sistema PHP (facturación) -->
     <div class="card-title" style="margin-top:20px;margin-bottom:12px;">Sistema de facturación</div>
     <div class="php-grid">
       <a class="php-link" href="https://hotelmaderalabradat.jjingenieros.pe/index.php?view=newfactura" target="_blank">
         <div class="php-link-icon" style="background:rgba(200,164,90,.15);color:var(--accent);"><i data-lucide="file-text" style="width:18px;height:18px;"></i></div>
-        <div><div class="php-link-name">Nueva factura</div><div class="php-link-desc">Boleta / Factura electrónica</div></div>
+        <div><div class="php-link-name">Nueva factura</div><div class="php-link-desc">Boleta / Factura + PDF</div></div>
       </a>
       <a class="php-link" href="https://hotelmaderalabradat.jjingenieros.pe/index.php?view=pre_venta" target="_blank">
         <div class="php-link-icon" style="background:rgba(90,158,111,.15);color:var(--ok);"><i data-lucide="shopping-cart" style="width:18px;height:18px;"></i></div>
-        <div><div class="php-link-name">Punto de venta</div><div class="php-link-desc">Venta de productos y servicios</div></div>
+        <div><div class="php-link-name">Punto de venta</div><div class="php-link-desc">Productos y servicios</div></div>
       </a>
       <a class="php-link" href="https://hotelmaderalabradat.jjingenieros.pe/index.php?view=apertura_caja" target="_blank">
         <div class="php-link-icon" style="background:rgba(90,158,111,.15);color:var(--ok);"><i data-lucide="lock-open" style="width:18px;height:18px;"></i></div>
-        <div><div class="php-link-name">Apertura caja</div><div class="php-link-desc">Abrir turno de caja</div></div>
+        <div><div class="php-link-name">Apertura caja</div><div class="php-link-desc">Abrir turno</div></div>
       </a>
       <a class="php-link" href="https://hotelmaderalabradat.jjingenieros.pe/index.php?view=cierre_caja" target="_blank">
         <div class="php-link-icon" style="background:rgba(192,80,80,.15);color:var(--err);"><i data-lucide="lock" style="width:18px;height:18px;"></i></div>
-        <div><div class="php-link-name">Cierre caja</div><div class="php-link-desc">Cerrar y liquidar turno</div></div>
+        <div><div class="php-link-name">Cierre caja</div><div class="php-link-desc">Liquidar turno</div></div>
       </a>
       <a class="php-link" href="https://hotelmaderalabradat.jjingenieros.pe/index.php?view=resumen_caja" target="_blank">
         <div class="php-link-icon" style="background:rgba(100,140,200,.15);color:#7aaad8;"><i data-lucide="clipboard-list" style="width:18px;height:18px;"></i></div>
         <div><div class="php-link-name">Resumen</div><div class="php-link-desc">Liquidación del turno</div></div>
       </a>
-      <a class="php-link" href="https://hotelmaderalabradat.jjingenieros.pe/index.php?view=reporte_caja" target="_blank">
-        <div class="php-link-icon" style="background:rgba(90,160,160,.15);color:#7ad8d8;"><i data-lucide="bar-chart-2" style="width:18px;height:18px;"></i></div>
-        <div><div class="php-link-name">Reporte caja</div><div class="php-link-desc">Historial de movimientos</div></div>
-      </a>
-      <a class="php-link" href="https://hotelmaderalabradat.jjingenieros.pe/index.php?view=listafe" target="_blank">
-        <div class="php-link-icon" style="background:rgba(160,120,200,.15);color:#b07ad8;"><i data-lucide="receipt" style="width:18px;height:18px;"></i></div>
-        <div><div class="php-link-name">Documentos</div><div class="php-link-desc">Lista de comprobantes emitidos</div></div>
-      </a>
       <a class="php-link" href="https://hotelmaderalabradat.jjingenieros.pe/index.php?view=egreso" target="_blank">
         <div class="php-link-icon" style="background:rgba(192,80,80,.15);color:var(--err);"><i data-lucide="trending-down" style="width:18px;height:18px;"></i></div>
-        <div><div class="php-link-name">Egresos</div><div class="php-link-desc">Registrar gasto o salida</div></div>
+        <div><div class="php-link-name">Egresos</div><div class="php-link-desc">Registrar gasto</div></div>
       </a>
     </div>
   </div>
@@ -222,7 +209,7 @@
   <!-- ════ NOTIFICACIONES ════ -->
   <div class="section" id="sec-notificaciones">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-      <div class="section-title" style="margin-bottom:0;">Notificaciones</div>
+      <div class="section-title" style="margin-bottom:0;">Alertas</div>
       <button class="btn-ghost-sm" onclick="marcarTodasLeidas()">Marcar leídas</button>
     </div>
     <div id="notif-lista"><div class="muted" style="text-align:center;padding:24px;">Cargando...</div></div>
@@ -232,13 +219,16 @@
 
 <!-- ── Bottom Nav ── -->
 <nav class="bottom-nav">
-  <button class="bnav-item active" id="nav-habitaciones"   onclick="showSection('habitaciones')">
-    <span class="bnav-icon"><i data-lucide="bed-double"></i></span><span>Habitaciones</span>
+  <button class="bnav-item active" id="nav-habitaciones" onclick="showSection('habitaciones')">
+    <span class="bnav-icon"><i data-lucide="bed-double"></i></span><span>Rooms</span>
   </button>
-  <button class="bnav-item"        id="nav-caja"           onclick="showSection('caja')">
+  <button class="bnav-item" id="nav-clientes" onclick="showSection('clientes')">
+    <span class="bnav-icon"><i data-lucide="users"></i></span><span>Clientes</span>
+  </button>
+  <button class="bnav-item" id="nav-caja" onclick="showSection('caja')">
     <span class="bnav-icon"><i data-lucide="banknote"></i></span><span>Caja</span>
   </button>
-  <button class="bnav-item"        id="nav-notificaciones" onclick="showSection('notificaciones')">
+  <button class="bnav-item" id="nav-notificaciones" onclick="showSection('notificaciones')">
     <span class="bnav-icon" style="position:relative;">
       <i data-lucide="bell"></i>
       <span id="bnav-badge" style="position:absolute;top:-4px;right:-6px;background:var(--err);color:#fff;font-size:9px;font-weight:700;width:14px;height:14px;border-radius:50%;display:none;align-items:center;justify-content:center;"></span>
@@ -247,13 +237,93 @@
   </button>
 </nav>
 
-<!-- ── Modal: Cambiar estado habitación ── -->
+<!-- ══ MODAL: Check-in ════════════════════════════════════ -->
+<div id="modal-checkin" class="modal-overlay" style="display:none;">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-title">Check-in</div>
+
+    <!-- Paso 1: Cliente -->
+    <div id="checkin-paso1">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Paso 1 de 2 — Datos del cliente</p>
+
+      <div class="dni-row">
+        <div class="field">
+          <label>DNI *</label>
+          <input type="text" id="ci-dni" placeholder="12345678" inputmode="numeric" maxlength="8" oninput="onDniInput()">
+        </div>
+        <button class="btn-ghost btn-sm" style="margin-bottom:0;height:38px;" onclick="buscarDni()">
+          <i data-lucide="search" style="width:16px;height:16px;vertical-align:middle;"></i>
+        </button>
+      </div>
+      <p id="dni-status" class="dni-status muted"></p>
+
+      <div class="field">
+        <label>Nombres *</label>
+        <input type="text" id="ci-nombres" placeholder="Juan Carlos">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="field">
+          <label>Ap. Paterno</label>
+          <input type="text" id="ci-apepat" placeholder="García">
+        </div>
+        <div class="field">
+          <label>Ap. Materno</label>
+          <input type="text" id="ci-apemat" placeholder="López">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="field">
+          <label>Teléfono</label>
+          <input type="text" id="ci-telefono" placeholder="987654321" inputmode="tel">
+        </div>
+        <div class="field">
+          <label>Nacionalidad</label>
+          <input type="text" id="ci-nac" placeholder="Peruana" value="Peruana">
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-ghost" onclick="cerrarCheckin()">Cancelar</button>
+        <button class="btn-primary" onclick="checkinPaso2()">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- Paso 2: Habitaciones -->
+    <div id="checkin-paso2" style="display:none;">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:4px;">Paso 2 de 2 — Habitaciones</p>
+      <p style="font-size:14px;font-weight:600;margin-bottom:14px;" id="ci-cliente-nombre-label"></p>
+
+      <p style="font-size:12px;color:var(--muted);margin-bottom:8px;">Seleccioná las habitaciones (podés elegir varias):</p>
+      <div class="hab-check-grid" id="hab-check-grid"></div>
+
+      <!-- Tarifa y noches por habitación seleccionada -->
+      <div id="ci-hab-detalles" style="margin-top:16px;"></div>
+
+      <div class="modal-footer">
+        <button class="btn-ghost" onclick="volverPaso1()">← Atrás</button>
+        <button class="btn-primary" id="btn-confirmar-checkin" onclick="confirmarCheckin()">Confirmar check-in</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Detalle cliente / Checkout ════════════════ -->
+<div id="modal-cliente" class="modal-overlay" style="display:none;">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-title" id="modal-cli-titulo">Cliente</div>
+    <div id="modal-cli-body"></div>
+    <div class="modal-footer" id="modal-cli-footer">
+      <button class="btn-ghost" onclick="cerrarModalCliente()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Habitación (cambiar estado) ═══════════════ -->
 <div id="modal-hab" class="modal-overlay" style="display:none;">
   <div class="modal">
     <div class="modal-title" id="modal-hab-titulo">Habitación</div>
-    <div style="margin-bottom:12px;font-size:13px;color:var(--muted);" id="modal-hab-tipo"></div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:14px;" id="modal-hab-info"></div>
     <input type="hidden" id="modal-hab-id">
-
     <div class="field">
       <label>Cambiar estado</label>
       <select id="modal-hab-estado">
@@ -265,9 +335,8 @@
     </div>
     <div class="field">
       <label>Observación (opcional)</label>
-      <textarea id="modal-hab-obs" placeholder="Ej: check-in familia García, 2 noches..."></textarea>
+      <textarea id="modal-hab-obs" placeholder="Ej: En espera de mantenimiento eléctrico..."></textarea>
     </div>
-
     <div class="modal-footer">
       <button class="btn-ghost" onclick="cerrarModalHab()">Cancelar</button>
       <button class="btn-primary" onclick="guardarEstadoHab()">Guardar</button>
@@ -275,13 +344,12 @@
   </div>
 </div>
 
-<!-- ── Modal: Movimiento de caja ── -->
+<!-- ══ MODAL: Movimiento de caja ════════════════════════ -->
 <div id="modal-mov" class="modal-overlay" style="display:none;">
   <div class="modal">
-    <div class="modal-title" id="modal-mov-titulo">Registrar ingreso</div>
+    <div class="modal-title" id="modal-mov-titulo">Registrar movimiento</div>
     <input type="hidden" id="modal-mov-tipo">
-
-    <div class="field">
+    <div class="field" id="campo-cat-ing">
       <label>Categoría</label>
       <select id="modal-mov-cat">
         <option value="habitacion">Habitación</option>
@@ -290,7 +358,7 @@
         <option value="otro">Otro ingreso</option>
       </select>
     </div>
-    <div class="field" id="campo-egreso-cat" style="display:none;">
+    <div class="field" id="campo-cat-egr" style="display:none;">
       <label>Categoría egreso</label>
       <select id="modal-mov-cat-egr">
         <option value="compras">Compras / Reposición</option>
@@ -319,9 +387,8 @@
     </div>
     <div class="field">
       <label>Referencia (opcional)</label>
-      <input type="text" id="modal-mov-ref" placeholder="Nro. habitación, pedido, etc.">
+      <input type="text" id="modal-mov-ref" placeholder="Nro. habitación, etc.">
     </div>
-
     <div class="modal-footer">
       <button class="btn-ghost" onclick="cerrarModalMov()">Cancelar</button>
       <button class="btn-primary" id="btn-guardar-mov" onclick="guardarMovimiento()">Guardar</button>
@@ -334,15 +401,20 @@
 <script>
 'use strict'
 
+// Token para API de DNI (apis.net.pe — registrarse en https://apis.net.pe)
+const DNI_API_TOKEN = 'apis-token-demo'  // <-- reemplazar con token real
+
 let perfil = null
 let habitacionesData = []
+let estanciasActivas = {}  // habitacion_id → {cliente, estancia}
 let filtroHab = ''
+let checkinClienteId = null
+let habsSeleccionadas = []  // [{id, nombre, tipo}]
 
 // ── Init ────────────────────────────────────────────────────
 async function init() {
   perfil = await requireAuth(['superadmin','admin','empleado'], ['Recepción'])
   if (!perfil) return
-
   lucide.createIcons()
 
   await Promise.all([
@@ -350,36 +422,42 @@ async function init() {
     cargarCaja(),
     cargarNotificaciones(),
   ])
-
   suscribirRealtime()
 }
 
 // ── Habitaciones ────────────────────────────────────────────
 async function cargarHabitaciones() {
-  const { data, error } = await sb.from('habitaciones')
-    .select('id, nombre, tipo, bloque, estado')
-    .eq('activo', true)
+  const { data: habs } = await sb.from('habitaciones')
+    .select('id, nombre, tipo, bloque, estado').eq('activo', true)
     .order('bloque').order('nombre')
 
-  if (error) { showAlert('Error cargando habitaciones', 'err'); return }
-  habitacionesData = data || []
+  // Cargar estancias activas para mostrar cliente en cada habitación
+  const { data: estancias } = await sb.from('estancias')
+    .select('habitacion_id, cliente_id, clientes(nombres, apellido_paterno)')
+    .eq('estado', 'activa')
+
+  estanciasActivas = {}
+  ;(estancias || []).forEach(e => {
+    estanciasActivas[e.habitacion_id] = e.clientes
+  })
+
+  habitacionesData = habs || []
   actualizarContadores()
   renderHabitaciones()
 }
 
 function actualizarContadores() {
-  const cnt = { Disponible:0, Ocupado:0, Limpieza:0, Mantenimiento:0 }
-  habitacionesData.forEach(h => cnt[h.estado] = (cnt[h.estado]||0) + 1)
-  document.getElementById('cnt-disponible').textContent = cnt.Disponible
-  document.getElementById('cnt-ocupado').textContent    = cnt.Ocupado
-  document.getElementById('cnt-limpieza').textContent   = cnt.Limpieza
-  document.getElementById('cnt-mant').textContent       = cnt.Mantenimiento
+  const c = { Disponible:0, Ocupado:0, Limpieza:0, Mantenimiento:0 }
+  habitacionesData.forEach(h => c[h.estado] = (c[h.estado]||0) + 1)
+  document.getElementById('cnt-disponible').textContent = c.Disponible
+  document.getElementById('cnt-ocupado').textContent    = c.Ocupado
+  document.getElementById('cnt-limpieza').textContent   = c.Limpieza
+  document.getElementById('cnt-mant').textContent       = c.Mantenimiento
 }
 
 function renderHabitaciones() {
-  const grid = document.getElementById('hab-grid')
+  const grid  = document.getElementById('hab-grid')
   const lista = filtroHab ? habitacionesData.filter(h => h.estado === filtroHab) : habitacionesData
-
   if (!lista.length) { grid.innerHTML = '<div class="muted">Sin habitaciones.</div>'; return }
 
   const bloques = {}
@@ -387,17 +465,21 @@ function renderHabitaciones() {
 
   grid.innerHTML = Object.entries(bloques).map(([bloque, habs]) => `
     <div class="bloque-label">${bloque}</div>
-    ${habs.map(h => `
-      <div class="hab-card ${h.estado}" onclick="abrirModalHab(${h.id})">
-        <div class="hab-card-nombre">${h.nombre}</div>
-        <div class="hab-card-tipo">${h.tipo}</div>
-        <div class="hab-card-estado">${h.estado}</div>
-      </div>
-    `).join('')}
+    ${habs.map(h => {
+      const cli = estanciasActivas[h.id]
+      const clienteLabel = cli ? (cli.nombres + ' ' + (cli.apellido_paterno||'')).trim() : ''
+      return `
+        <div class="hab-card ${h.estado}" onclick="clickHabitacion(${h.id})">
+          <div class="hab-card-nombre">${h.nombre}</div>
+          <div class="hab-card-tipo">${h.tipo}</div>
+          <div class="hab-card-estado">${h.estado}</div>
+          ${clienteLabel ? `<div class="hab-card-cliente">${clienteLabel}</div>` : ''}
+        </div>
+      `
+    }).join('')}
   `).join('')
 }
 
-// Filtros
 document.querySelectorAll('.hab-fil').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.hab-fil').forEach(b => b.classList.remove('active'))
@@ -407,97 +489,452 @@ document.querySelectorAll('.hab-fil').forEach(btn => {
   })
 })
 
-// ── Modal habitación ────────────────────────────────────────
+function clickHabitacion(id) {
+  const h = habitacionesData.find(x => x.id === id)
+  if (!h) return
+  if (h.estado === 'Disponible') {
+    // Abrir check-in con esta habitación pre-seleccionada
+    abrirCheckin(id)
+  } else if (h.estado === 'Ocupado') {
+    // Mostrar detalle del cliente
+    const estancia = estanciasActivas[id]
+    if (estancia) abrirDetalleCliente(id)
+    else abrirModalHab(id)
+  } else {
+    abrirModalHab(id)
+  }
+}
+
+// ── Modal cambiar estado habitación ─────────────────────────
 function abrirModalHab(id) {
   const h = habitacionesData.find(x => x.id === id)
   if (!h) return
-  document.getElementById('modal-hab-id').value      = id
+  document.getElementById('modal-hab-id').value = id
   document.getElementById('modal-hab-titulo').textContent = `Habitación ${h.nombre}`
-  document.getElementById('modal-hab-tipo').textContent   = h.tipo + ' · ' + h.bloque
-  document.getElementById('modal-hab-estado').value  = h.estado
-  document.getElementById('modal-hab-obs').value     = ''
+  document.getElementById('modal-hab-info').textContent   = `${h.tipo} · ${h.bloque}`
+  document.getElementById('modal-hab-estado').value = h.estado
+  document.getElementById('modal-hab-obs').value    = ''
   document.getElementById('modal-hab').style.display = 'flex'
 }
-
 function cerrarModalHab() { document.getElementById('modal-hab').style.display = 'none' }
 
 async function guardarEstadoHab() {
-  const id      = parseInt(document.getElementById('modal-hab-id').value)
-  const estado  = document.getElementById('modal-hab-estado').value
-  const obs     = document.getElementById('modal-hab-obs').value.trim()
+  const id     = parseInt(document.getElementById('modal-hab-id').value)
+  const estado = document.getElementById('modal-hab-estado').value
+  const obs    = document.getElementById('modal-hab-obs').value.trim()
 
   const { error } = await sb.from('habitaciones').update({ estado }).eq('id', id)
   if (error) { showAlert('Error al actualizar', 'err'); return }
-
-  // Log manual si tiene observación (el trigger ya loguea sin obs)
-  if (obs) {
-    await sb.from('habitaciones_log').insert({
-      habitacion_id:  id,
-      estado_nuevo:   estado,
-      observacion:    obs,
-      registrado_por: perfil.id,
-    })
-  }
+  if (obs) await sb.from('habitaciones_log').insert({ habitacion_id:id, estado_nuevo:estado, observacion:obs, registrado_por:perfil.id })
 
   cerrarModalHab()
   showAlert('Estado actualizado', 'ok')
   await cargarHabitaciones()
 }
 
-// ── Caja ────────────────────────────────────────────────────
-async function cargarCaja() {
-  const hoyStr = new Date().toISOString().slice(0, 10)
+// ── CHECK-IN ────────────────────────────────────────────────
+let habPreseleccionada = null
 
-  const { data: movs } = await sb.from('caja_movimientos')
-    .select('id, tipo, categoria, concepto, monto, metodo_pago, area, created_at, anulado, perfiles(nombre,apellido)')
-    .eq('anulado', false)
-    .gte('created_at', hoyStr + 'T00:00:00')
-    .order('created_at', { ascending: false })
+function abrirCheckin(habId = null) {
+  habPreseleccionada = habId
+  checkinClienteId   = null
+  habsSeleccionadas  = []
 
-  const lista = movs || []
-  const ingresos = lista.filter(m => m.tipo==='ingreso').reduce((s,m) => s+parseFloat(m.monto), 0)
-  const egresos  = lista.filter(m => m.tipo==='egreso').reduce((s,m)  => s+parseFloat(m.monto), 0)
+  // Limpiar campos
+  ;['ci-dni','ci-nombres','ci-apepat','ci-apemat','ci-telefono'].forEach(id => {
+    document.getElementById(id).value = ''
+  })
+  document.getElementById('ci-nac').value = 'Peruana'
+  document.getElementById('dni-status').textContent = ''
 
-  document.getElementById('caja-ingresos').textContent = 'S/' + ingresos.toFixed(2)
-  document.getElementById('caja-egresos').textContent  = 'S/' + egresos.toFixed(2)
-  document.getElementById('caja-saldo').textContent    = 'S/' + (ingresos - egresos).toFixed(2)
+  document.getElementById('checkin-paso1').style.display = ''
+  document.getElementById('checkin-paso2').style.display = 'none'
+  document.getElementById('modal-checkin').style.display = 'flex'
+}
 
-  const el = document.getElementById('mov-lista')
-  if (!lista.length) { el.innerHTML = '<div class="muted" style="padding:12px 0;">Sin movimientos hoy.</div>'; return }
+function cerrarCheckin() { document.getElementById('modal-checkin').style.display = 'none' }
 
-  el.innerHTML = lista.map(m => `
-    <div class="mov-row">
-      <div>
-        <div class="mov-concepto">${m.concepto}</div>
-        <div class="mov-meta">${m.categoria} · ${m.metodo_pago || '—'} · ${fmtHora(m.created_at)}</div>
+// DNI autocomplete
+let dniTimer = null
+function onDniInput() {
+  const dni = document.getElementById('ci-dni').value.trim()
+  clearTimeout(dniTimer)
+  if (dni.length === 8) dniTimer = setTimeout(buscarDni, 500)
+}
+
+async function buscarDni() {
+  const dni = document.getElementById('ci-dni').value.trim()
+  if (dni.length !== 8) return
+
+  const statusEl = document.getElementById('dni-status')
+  statusEl.textContent = 'Buscando...'
+  statusEl.className = 'dni-status muted'
+
+  // 1. Buscar en nuestra base de datos primero
+  const { data: clienteExistente } = await sb.from('clientes').select('*').eq('dni', dni).single()
+  if (clienteExistente) {
+    rellenarCamposCliente(clienteExistente)
+    checkinClienteId = clienteExistente.id
+    statusEl.textContent = '✓ Cliente encontrado en el sistema'
+    statusEl.className = 'dni-status ok-msg'
+    return
+  }
+
+  // 2. Consultar API externa
+  try {
+    const res = await fetch(`https://api.apis.net.pe/v2/dni?numero=${dni}`, {
+      headers: { 'Authorization': `Bearer ${DNI_API_TOKEN}`, 'Content-Type': 'application/json' }
+    })
+    if (!res.ok) throw new Error()
+    const data = await res.json()
+    if (data.nombres) {
+      document.getElementById('ci-nombres').value = data.nombres || ''
+      document.getElementById('ci-apepat').value  = data.apellidoPaterno || ''
+      document.getElementById('ci-apemat').value  = data.apellidoMaterno || ''
+      statusEl.textContent = '✓ Datos obtenidos de RENIEC'
+      statusEl.className = 'dni-status ok-msg'
+    } else {
+      statusEl.textContent = 'DNI no encontrado en RENIEC'
+      statusEl.className = 'dni-status err-msg'
+    }
+  } catch {
+    statusEl.textContent = 'Ingresá los datos manualmente'
+    statusEl.className = 'dni-status muted'
+  }
+}
+
+function rellenarCamposCliente(c) {
+  document.getElementById('ci-nombres').value  = c.nombres || ''
+  document.getElementById('ci-apepat').value   = c.apellido_paterno || ''
+  document.getElementById('ci-apemat').value   = c.apellido_materno || ''
+  document.getElementById('ci-telefono').value = c.telefono || ''
+  document.getElementById('ci-nac').value      = c.nacionalidad || 'Peruana'
+}
+
+async function checkinPaso2() {
+  const nombres = document.getElementById('ci-nombres').value.trim()
+  if (!nombres) { showAlert('Ingresá el nombre del cliente', 'err'); return }
+
+  // Mostrar habitaciones disponibles
+  const disponibles = habitacionesData.filter(h => h.estado === 'Disponible')
+  if (!disponibles.length) { showAlert('No hay habitaciones disponibles', 'err'); return }
+
+  habsSeleccionadas = habPreseleccionada ? [habPreseleccionada] : []
+
+  const grid = document.getElementById('hab-check-grid')
+  grid.innerHTML = disponibles.map(h => `
+    <div class="hab-check-item ${habsSeleccionadas.includes(h.id) ? 'selected' : ''}"
+         data-id="${h.id}" onclick="toggleHabCheckin(${h.id}, this)">
+      <div class="hab-check-nombre">${h.nombre}</div>
+      <div class="hab-check-tipo">${h.tipo}</div>
+    </div>
+  `).join('')
+
+  const nombre = [nombres, document.getElementById('ci-apepat').value, document.getElementById('ci-apemat').value].filter(Boolean).join(' ')
+  document.getElementById('ci-cliente-nombre-label').textContent = nombre
+
+  document.getElementById('checkin-paso1').style.display = 'none'
+  document.getElementById('checkin-paso2').style.display = ''
+
+  renderDetallesHabs()
+}
+
+function volverPaso1() {
+  document.getElementById('checkin-paso1').style.display = ''
+  document.getElementById('checkin-paso2').style.display = 'none'
+}
+
+function toggleHabCheckin(id, el) {
+  if (habsSeleccionadas.includes(id)) {
+    habsSeleccionadas = habsSeleccionadas.filter(x => x !== id)
+    el.classList.remove('selected')
+  } else {
+    habsSeleccionadas.push(id)
+    el.classList.add('selected')
+  }
+  renderDetallesHabs()
+}
+
+function renderDetallesHabs() {
+  const el = document.getElementById('ci-hab-detalles')
+  if (!habsSeleccionadas.length) { el.innerHTML = ''; return }
+
+  el.innerHTML = habsSeleccionadas.map(id => {
+    const h = habitacionesData.find(x => x.id === id)
+    return `
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;">
+        <div style="font-weight:600;margin-bottom:8px;">${h.nombre} — ${h.tipo}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div class="field" style="margin-bottom:0;">
+            <label>Tarifa/noche (S/)</label>
+            <input type="number" id="tarifa-${id}" placeholder="0.00" min="0" step="0.01" inputmode="decimal">
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label>Noches</label>
+            <input type="number" id="noches-${id}" placeholder="1" min="1" value="1" inputmode="numeric">
+          </div>
+        </div>
       </div>
-      <div style="text-align:right;flex-shrink:0;">
-        <span style="font-weight:700;color:${m.tipo==='ingreso'?'var(--ok)':'var(--err)'};">
-          ${m.tipo==='ingreso'?'+':'−'}S/${parseFloat(m.monto).toFixed(2)}
-        </span>
+    `
+  }).join('')
+}
+
+async function confirmarCheckin() {
+  if (!habsSeleccionadas.length) { showAlert('Seleccioná al menos una habitación', 'err'); return }
+
+  const btn = document.getElementById('btn-confirmar-checkin')
+  btn.disabled = true
+
+  try {
+    // 1. Crear o actualizar cliente
+    const dni     = document.getElementById('ci-dni').value.trim()
+    const nombres = document.getElementById('ci-nombres').value.trim()
+    const apepat  = document.getElementById('ci-apepat').value.trim()
+    const apemat  = document.getElementById('ci-apemat').value.trim()
+    const tel     = document.getElementById('ci-telefono').value.trim()
+    const nac     = document.getElementById('ci-nac').value.trim()
+
+    let clienteId = checkinClienteId
+    if (!clienteId) {
+      const payload = { nombres, apellido_paterno:apepat||null, apellido_materno:apemat||null, telefono:tel||null, nacionalidad:nac }
+      if (dni) payload.dni = dni
+
+      const { data: cli, error: errCli } = await sb.from('clientes')
+        .upsert(payload, { onConflict: 'dni' })
+        .select('id').single()
+      if (errCli) throw errCli
+      clienteId = cli.id
+    }
+
+    // 2. Crear estancia por cada habitación seleccionada
+    const estancias = habsSeleccionadas.map(habId => ({
+      cliente_id:     clienteId,
+      habitacion_id:  habId,
+      noches:         parseInt(document.getElementById('noches-' + habId)?.value || '1'),
+      tarifa_noche:   parseFloat(document.getElementById('tarifa-' + habId)?.value || '0'),
+      registrado_por: perfil.id,
+    }))
+
+    const { error: errEst } = await sb.from('estancias').insert(estancias)
+    if (errEst) throw errEst
+
+    // 3. Marcar habitaciones como Ocupado
+    await Promise.all(habsSeleccionadas.map(habId =>
+      sb.from('habitaciones').update({ estado: 'Ocupado' }).eq('id', habId)
+    ))
+
+    cerrarCheckin()
+    showAlert(`Check-in confirmado (${habsSeleccionadas.length} hab.)`, 'ok')
+    await Promise.all([cargarHabitaciones(), cargarClientesActivos()])
+
+  } catch (e) {
+    showAlert('Error al confirmar check-in', 'err')
+    console.error(e)
+  } finally {
+    btn.disabled = false
+  }
+}
+
+// ── Clientes activos ────────────────────────────────────────
+async function cargarClientesActivos() {
+  const { data, error } = await sb.from('clientes_activos').select('*')
+  if (error) { console.error(error); return }
+
+  const el = document.getElementById('clientes-lista')
+  if (!data || !data.length) {
+    el.innerHTML = '<div class="muted" style="text-align:center;padding:32px;">No hay clientes activos.</div>'
+    return
+  }
+
+  el.innerHTML = data.map(c => `
+    <div class="cliente-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+        <div>
+          <div class="cliente-nombre">${c.nombre_completo}</div>
+          <div class="cliente-dni">${c.dni ? 'DNI ' + c.dni : 'Sin DNI'} · ${c.nacionalidad || ''}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div class="cliente-total">S/ ${parseFloat(c.total_general||0).toFixed(2)}</div>
+          <div style="font-size:11px;color:var(--muted);">${c.cant_habitaciones} hab.</div>
+        </div>
+      </div>
+
+      <div class="cliente-habs">
+        ${c.habitaciones.split(', ').map(h => `<span class="hab-tag">${h}</span>`).join('')}
+      </div>
+
+      ${parseFloat(c.total_extras_pendientes) > 0 ? `
+        <div style="font-size:12px;color:var(--accent);margin-bottom:8px;">
+          + S/ ${parseFloat(c.total_extras_pendientes).toFixed(2)} en extras
+        </div>
+      ` : ''}
+
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">
+        Check-in: ${fmtFecha(new Date(c.check_in).toISOString().slice(0,10))}
+      </div>
+
+      <div class="cliente-actions">
+        <button class="btn-primary btn-sm"  onclick="abrirDetalleClienteById(${c.cliente_id})">Ver detalle</button>
+        <button class="btn-ghost btn-sm"    onclick="agregarHabACliente(${c.cliente_id})">+ Habitación</button>
+        <button class="btn-danger btn-sm"   onclick="iniciarCheckout(${c.cliente_id})">Check-out</button>
       </div>
     </div>
   `).join('')
 }
 
-// ── Modal movimiento ────────────────────────────────────────
-function abrirModalMovimiento(tipo) {
-  document.getElementById('modal-mov-tipo').value       = tipo
-  document.getElementById('modal-mov-titulo').textContent = tipo === 'ingreso' ? 'Registrar ingreso' : 'Registrar egreso'
-  document.getElementById('modal-mov-concepto').value   = ''
-  document.getElementById('modal-mov-monto').value      = ''
-  document.getElementById('modal-mov-ref').value        = ''
-  document.getElementById('modal-mov-metodo').value     = 'efectivo'
+// ── Detalle cliente / Checkout ───────────────────────────────
+async function abrirDetalleClienteById(clienteId) {
+  const { data: estancias } = await sb.from('estancias')
+    .select('*, habitaciones(nombre, tipo)')
+    .eq('cliente_id', clienteId).eq('estado', 'activa')
 
-  // Mostrar categorías según tipo
-  const catIng = document.getElementById('modal-mov-cat').parentElement
-  const catEgr = document.getElementById('campo-egreso-cat')
-  if (tipo === 'ingreso') { catIng.style.display=''; catEgr.style.display='none' }
-  else                    { catIng.style.display='none'; catEgr.style.display='' }
+  const { data: extras } = await sb.from('estancia_extras')
+    .select('*').eq('cliente_id', clienteId).eq('facturado', false)
 
-  document.getElementById('modal-mov').style.display = 'flex'
+  const { data: cliente } = await sb.from('clientes').select('*').eq('id', clienteId).single()
+
+  const nombre = [cliente.nombres, cliente.apellido_paterno, cliente.apellido_materno].filter(Boolean).join(' ')
+  document.getElementById('modal-cli-titulo').textContent = nombre
+
+  let html = `<div style="font-size:12px;color:var(--muted);margin-bottom:16px;">DNI ${cliente.dni||'—'} · ${cliente.nacionalidad||''} · ${cliente.telefono||'Sin tel.'}</div>`
+
+  html += `<div class="card-title">Habitaciones</div>`
+  html += (estancias||[]).map(e => `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-weight:700;">${e.habitaciones.nombre} — ${e.habitaciones.tipo}</div>
+          <div style="font-size:12px;color:var(--muted);">${e.noches} noche(s) × S/${parseFloat(e.tarifa_noche).toFixed(2)}</div>
+        </div>
+        <div style="font-weight:700;color:var(--accent);">S/${(e.noches * parseFloat(e.tarifa_noche)).toFixed(2)}</div>
+      </div>
+    </div>
+  `).join('')
+
+  if (extras && extras.length) {
+    html += `<div class="card-title" style="margin-top:12px;">Extras</div>`
+    html += extras.map(x => `
+      <div class="extra-row">
+        <div>
+          <div>${x.descripcion}</div>
+          <div style="font-size:11px;color:var(--muted);">${x.area||''} · ${x.cantidad} u.</div>
+        </div>
+        <div style="font-weight:600;color:var(--accent);">S/${(x.cantidad * parseFloat(x.precio_unit)).toFixed(2)}</div>
+      </div>
+    `).join('')
+  }
+
+  const totalHabs   = (estancias||[]).reduce((s,e) => s + e.noches * parseFloat(e.tarifa_noche), 0)
+  const totalExtras = (extras||[]).reduce((s,x) => s + x.cantidad * parseFloat(x.precio_unit), 0)
+  html += `
+    <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:14px;font-weight:700;">Total</div>
+      <div style="font-size:20px;font-weight:700;color:var(--accent);">S/${(totalHabs+totalExtras).toFixed(2)}</div>
+    </div>
+  `
+
+  document.getElementById('modal-cli-body').innerHTML = html
+  document.getElementById('modal-cli-footer').innerHTML = `
+    <button class="btn-ghost"   onclick="cerrarModalCliente()">Cerrar</button>
+    <button class="btn-warn"    onclick="agregarHabACliente(${clienteId})">+ Habitación</button>
+    <button class="btn-primary" onclick="iniciarCheckout(${clienteId})">Check-out</button>
+  `
+  document.getElementById('modal-cliente').style.display = 'flex'
 }
 
+async function abrirDetalleCliente(habId) {
+  const { data } = await sb.from('estancias')
+    .select('cliente_id').eq('habitacion_id', habId).eq('estado','activa').single()
+  if (data) abrirDetalleClienteById(data.cliente_id)
+}
+
+function cerrarModalCliente() { document.getElementById('modal-cliente').style.display = 'none' }
+
+async function agregarHabACliente(clienteId) {
+  // Reusar modal de check-in pero saltando paso 1
+  cerrarModalCliente()
+  habPreseleccionada  = null
+  habsSeleccionadas   = []
+  checkinClienteId    = clienteId
+
+  const disponibles = habitacionesData.filter(h => h.estado === 'Disponible')
+  if (!disponibles.length) { showAlert('No hay habitaciones disponibles', 'err'); return }
+
+  const { data: cli } = await sb.from('clientes').select('*').eq('id', clienteId).single()
+  const nombre = [cli.nombres, cli.apellido_paterno, cli.apellido_materno].filter(Boolean).join(' ')
+  document.getElementById('ci-cliente-nombre-label').textContent = nombre
+
+  const grid = document.getElementById('hab-check-grid')
+  grid.innerHTML = disponibles.map(h => `
+    <div class="hab-check-item" data-id="${h.id}" onclick="toggleHabCheckin(${h.id}, this)">
+      <div class="hab-check-nombre">${h.nombre}</div>
+      <div class="hab-check-tipo">${h.tipo}</div>
+    </div>
+  `).join('')
+
+  document.getElementById('ci-hab-detalles').innerHTML = ''
+  document.getElementById('checkin-paso1').style.display = 'none'
+  document.getElementById('checkin-paso2').style.display = ''
+  document.getElementById('modal-checkin').style.display = 'flex'
+}
+
+async function iniciarCheckout(clienteId) {
+  const ok = await customConfirm('¿Confirmar check-out? Las habitaciones pasarán a Limpieza.', 'Check-out', 'Cancelar')
+  if (!ok) return
+
+  cerrarModalCliente()
+
+  // Completar todas las estancias activas de este cliente
+  const { error } = await sb.from('estancias')
+    .update({ estado: 'completada', check_out: new Date().toISOString() })
+    .eq('cliente_id', clienteId).eq('estado', 'activa')
+
+  if (error) { showAlert('Error al hacer check-out', 'err'); return }
+
+  showAlert('Check-out realizado. Habitaciones en limpieza.', 'ok')
+  await Promise.all([cargarHabitaciones(), cargarClientesActivos()])
+}
+
+// ── Caja ────────────────────────────────────────────────────
+async function cargarCaja() {
+  const hoy = new Date().toISOString().slice(0,10)
+  const { data } = await sb.from('caja_movimientos')
+    .select('tipo, categoria, concepto, monto, metodo_pago, created_at')
+    .eq('anulado', false).gte('created_at', hoy + 'T00:00:00')
+    .order('created_at', { ascending: false })
+
+  const lista = data || []
+  const ing = lista.filter(m => m.tipo==='ingreso').reduce((s,m) => s+parseFloat(m.monto), 0)
+  const egr = lista.filter(m => m.tipo==='egreso').reduce((s,m)  => s+parseFloat(m.monto), 0)
+
+  document.getElementById('caja-ingresos').textContent = 'S/' + ing.toFixed(2)
+  document.getElementById('caja-egresos').textContent  = 'S/' + egr.toFixed(2)
+  document.getElementById('caja-saldo').textContent    = 'S/' + (ing-egr).toFixed(2)
+
+  const el = document.getElementById('mov-lista')
+  if (!lista.length) { el.innerHTML = '<div class="muted" style="padding:12px 0;">Sin movimientos hoy.</div>'; return }
+  el.innerHTML = lista.map(m => `
+    <div class="mov-row">
+      <div>
+        <div>${m.concepto}</div>
+        <div class="mov-meta">${m.categoria} · ${m.metodo_pago||'—'} · ${fmtHora(m.created_at)}</div>
+      </div>
+      <div style="font-weight:700;color:${m.tipo==='ingreso'?'var(--ok)':'var(--err)'};">
+        ${m.tipo==='ingreso'?'+':'−'}S/${parseFloat(m.monto).toFixed(2)}
+      </div>
+    </div>
+  `).join('')
+}
+
+function abrirModalMov(tipo) {
+  document.getElementById('modal-mov-tipo').value = tipo
+  document.getElementById('modal-mov-titulo').textContent = tipo==='ingreso' ? 'Registrar ingreso' : 'Registrar egreso'
+  ;['modal-mov-concepto','modal-mov-monto','modal-mov-ref'].forEach(id => document.getElementById(id).value='')
+  document.getElementById('modal-mov-metodo').value = 'efectivo'
+  document.getElementById('campo-cat-ing').style.display = tipo==='ingreso' ? '' : 'none'
+  document.getElementById('campo-cat-egr').style.display = tipo==='egreso'  ? '' : 'none'
+  document.getElementById('modal-mov').style.display = 'flex'
+}
 function cerrarModalMov() { document.getElementById('modal-mov').style.display = 'none' }
 
 async function guardarMovimiento() {
@@ -506,113 +943,105 @@ async function guardarMovimiento() {
   const monto    = parseFloat(document.getElementById('modal-mov-monto').value)
   const metodo   = document.getElementById('modal-mov-metodo').value
   const ref      = document.getElementById('modal-mov-ref').value.trim()
-  const cat      = tipo === 'ingreso'
-    ? document.getElementById('modal-mov-cat').value
-    : document.getElementById('modal-mov-cat-egr').value
+  const cat      = tipo==='ingreso' ? document.getElementById('modal-mov-cat').value
+                                    : document.getElementById('modal-mov-cat-egr').value
 
-  if (!concepto) { showAlert('Ingresá un concepto', 'err'); return }
-  if (!monto || monto <= 0) { showAlert('Ingresá un monto válido', 'err'); return }
+  if (!concepto)    { showAlert('Ingresá un concepto', 'err'); return }
+  if (!monto||monto<=0) { showAlert('Monto inválido', 'err'); return }
 
   const btn = document.getElementById('btn-guardar-mov')
   btn.disabled = true
 
   const { error } = await sb.from('caja_movimientos').insert({
-    tipo, categoria: cat, concepto, monto, metodo_pago: metodo,
-    referencia: ref || null, area: 'Recepción', registrado_por: perfil.id,
+    tipo, categoria:cat, concepto, monto, metodo_pago:metodo,
+    referencia:ref||null, area:'Recepción', registrado_por:perfil.id,
   })
 
   btn.disabled = false
   if (error) { showAlert('Error al registrar', 'err'); return }
-
   cerrarModalMov()
-  showAlert(`${tipo === 'ingreso' ? 'Ingreso' : 'Egreso'} registrado`, 'ok')
+  showAlert(`${tipo==='ingreso'?'Ingreso':'Egreso'} registrado`, 'ok')
   await cargarCaja()
 }
 
 // ── Notificaciones ──────────────────────────────────────────
 async function cargarNotificaciones() {
   const { data } = await sb.from('notificaciones')
-    .select('*')
-    .or('area_destino.eq.Recepción,area_destino.is.null')
-    .order('created_at', { ascending: false })
-    .limit(40)
+    .select('*').or('area_destino.eq.Recepción,area_destino.is.null')
+    .order('created_at', { ascending:false }).limit(40)
 
-  renderNotificaciones(data || [])
-  actualizarBadge(data || [])
+  renderNotificaciones(data||[])
+  actualizarBadge(data||[])
 }
 
 function renderNotificaciones(notifs) {
   const el = document.getElementById('notif-lista')
-  if (!notifs.length) { el.innerHTML = '<div class="muted" style="text-align:center;padding:24px;">Sin notificaciones.</div>'; return }
-
+  if (!notifs.length) { el.innerHTML='<div class="muted" style="text-align:center;padding:24px;">Sin alertas.</div>'; return }
   el.innerHTML = notifs.map(n => `
-    <div class="notif-item ${n.leida ? '' : 'no-leida'}" onclick="marcarLeida(${n.id}, this)">
+    <div class="notif-item ${n.leida?'':'no-leida'}" onclick="marcarLeida(${n.id}, this)">
       <div class="notif-titulo">${n.titulo}</div>
-      ${n.mensaje ? `<div class="notif-mensaje">${n.mensaje}</div>` : ''}
+      ${n.mensaje?`<div class="notif-mensaje">${n.mensaje}</div>`:''}
       <div class="notif-hora">${tiempoRelativo(n.created_at)}</div>
     </div>
   `).join('')
 }
 
 function actualizarBadge(notifs) {
-  const n = notifs.filter(x => !x.leida).length
+  const n = notifs.filter(x=>!x.leida).length
   ;['notif-badge','bnav-badge'].forEach(id => {
     const el = document.getElementById(id)
-    el.textContent = n > 9 ? '9+' : n
-    el.style.display = n > 0 ? 'flex' : 'none'
+    el.textContent = n>9?'9+':n; el.style.display = n>0?'flex':'none'
   })
 }
 
 async function marcarLeida(id, el) {
   el.classList.remove('no-leida')
-  await sb.from('notificaciones').update({ leida: true }).eq('id', id)
+  await sb.from('notificaciones').update({leida:true}).eq('id',id)
 }
-
 async function marcarTodasLeidas() {
-  await sb.from('notificaciones').update({ leida: true })
-    .or('area_destino.eq.Recepción,area_destino.is.null').eq('leida', false)
+  await sb.from('notificaciones').update({leida:true})
+    .or('area_destino.eq.Recepción,area_destino.is.null').eq('leida',false)
   await cargarNotificaciones()
-  showAlert('Marcadas como leídas', 'ok')
+  showAlert('Marcadas como leídas','ok')
 }
 
 function tiempoRelativo(iso) {
-  const diff = Date.now() - new Date(iso).getTime()
-  const min  = Math.floor(diff / 60000)
-  if (min < 1)  return 'ahora'
-  if (min < 60) return `hace ${min} min`
-  const h = Math.floor(min / 60)
-  if (h < 24)  return `hace ${h} h`
+  const diff = Date.now()-new Date(iso).getTime(), min=Math.floor(diff/60000)
+  if(min<1) return 'ahora'; if(min<60) return `hace ${min} min`
+  const h=Math.floor(min/60); if(h<24) return `hace ${h} h`
   return `hace ${Math.floor(h/24)} d`
 }
 
 // ── Realtime ────────────────────────────────────────────────
 function suscribirRealtime() {
-  sb.channel('recepcion-realtime')
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'habitaciones' },
+  sb.channel('recepcion')
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'habitaciones'},
       () => cargarHabitaciones())
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notificaciones' },
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'notificaciones'},
       payload => {
-        const n = payload.new
-        if (!n.area_destino || n.area_destino === 'Recepción') {
-          showAlert(n.titulo, 'warn')
-          cargarNotificaciones()
+        const n=payload.new
+        if(!n.area_destino||n.area_destino==='Recepción'){
+          showAlert(n.titulo,'warn'); cargarNotificaciones()
         }
       })
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'caja_movimientos' },
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'caja_movimientos'},
       () => cargarCaja())
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'estancias'},
+      () => { cargarHabitaciones(); cargarClientesActivos() })
     .subscribe()
 }
 
 // ── Navegación ──────────────────────────────────────────────
 function showSection(nombre) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'))
-  document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active'))
-  document.getElementById('sec-' + nombre).classList.add('active')
-  document.getElementById('nav-' + nombre).classList.add('active')
-  document.getElementById('page-title').textContent = {
-    habitaciones: 'Recepción', caja: 'Caja', notificaciones: 'Notificaciones'
-  }[nombre]
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'))
+  document.querySelectorAll('.bnav-item').forEach(b=>b.classList.remove('active'))
+  document.getElementById('sec-'+nombre).classList.add('active')
+  document.getElementById('nav-'+nombre).classList.add('active')
+  document.getElementById('page-title').textContent={
+    habitaciones:'Recepción',clientes:'Clientes',caja:'Caja',notificaciones:'Alertas'
+  }[nombre]||'Recepción'
   lucide.createIcons()
+  if(nombre==='clientes') cargarClientesActivos()
 }
 
 init()
