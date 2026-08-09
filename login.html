@@ -36,6 +36,7 @@
     sb.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) return
       const { data: p } = await sb.from('perfiles').select('rol,area,activo').eq('id', session.user.id).single()
+      sessionStorage.setItem('login_debug', JSON.stringify({ uid: session.user.id, p }))
       if (p && p.activo) redirigirSegunRol(p)
     })
 
